@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const { sequelize } = require('../../config/db.postgres');
+const  {sequelize}  = require('../../config/db.postgres');
 
 const AiCallLog = sequelize.define('AiCallLog', {
   call_id: {
