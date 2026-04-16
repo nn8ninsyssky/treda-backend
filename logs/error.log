@@ -1,0 +1,14 @@
+[2026-04-11 16:16:26] ERROR: PostgreSQL connection failed:
+[2026-04-11 16:16:32] ERROR: PostgreSQL connection failed:
+[2026-04-11 17:25:37] ERROR: PostgreSQL connection failed:
+[2026-04-11 17:53:31] ERROR: PostgreSQL connection failed:
+[2026-04-11 17:54:16] ERROR: PostgreSQL connection failed:
+[2026-04-11 17:56:16] ERROR: PostgreSQL connection failed:
+[2026-04-13 16:28:21] ERROR: Failed to start server: sequelize.sync is not a function
+[2026-04-13 16:49:52] ERROR: Failed to start server: cannot cast type vendor_status_enum to enum_vendors_vendor_status
+[2026-04-13 16:50:05] ERROR: Failed to start server: cannot cast type vendor_status_enum to enum_vendors_vendor_status
+[2026-04-13 17:05:11] ERROR: Failed to start server: cannot cast type vendor_status_enum to enum_vendors_vendor_status
+[2026-04-13 17:05:25] ERROR: Failed to start server: cannot cast type vendor_status_enum to enum_vendors_vendor_status
+[2026-04-16 11:24:27] ERROR: column "customer_adhaar_no" does not exist — POST /api/auth/register
+[2026-04-16 11:48:48] ERROR: column "customer_adhaar_no" of relation "customers" does not exist — POST /api/auth/register
+[2026-04-16 11:54:54] ERROR: column "customer_adhaar_no" of relation "customers" does not exist — POST /api/auth/register
