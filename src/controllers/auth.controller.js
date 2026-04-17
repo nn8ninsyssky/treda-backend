@@ -172,21 +172,21 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const customer = await Customer.findOne({
-      where: { customer_email: email }
+    // 1️⃣ Find user (NOT customer)
+    const user = await User.findOne({
+      where: { email },
+      attributes: { include: ['password'] }  // ⭐ FIX
     });
 
-    if (!customer) {
+    if (!user) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials',
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      customer.customer_password
-    );
+    // 2️⃣ Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
@@ -195,16 +195,18 @@ exports.login = async (req, res, next) => {
       });
     }
 
-    const tokens = generateTokens({
-      id: customer.customer_id,
-      role: 'customer',
-      name: customer.customer_name
-    });
+    // 3️⃣ Generate tokens
+    const tokens = generateTokens(user);
 
     res.json({
       success: true,
       message: 'Login successful',
       ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      }
     });
 
   } catch (err) {
