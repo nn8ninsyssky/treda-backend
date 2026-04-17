@@ -3,7 +3,13 @@ const router = express.Router();
 
 const controller = require('../controllers/customer.controller') ;
 const authenticate = require('../middlewares/auth');
-router.get('/', authenticate, controller.getAll);
+
+
+// GET logged-in customer
+router.get("/me", authenticate, controller.getProfile);
+
+
+// router.get('/', authenticate, controller.getAll);
 router.post('/', authenticate, controller.create);
 router.get('/:id', authenticate, controller.getOne);
 router.put('/:id', authenticate, controller.update);

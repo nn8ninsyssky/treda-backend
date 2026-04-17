@@ -176,6 +176,7 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({
       where: { email },
       attributes: { include: ['password'] }  // ⭐ FIX
+      
     });
 
     if (!user) {

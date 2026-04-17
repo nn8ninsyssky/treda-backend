@@ -1,3 +1,31 @@
+const { Customer } = require('../models/pg');
+
+exports.getProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id; // coming from JWT
+
+    const customer = await Customer.findOne({
+      where: { user_id: userId }
+    });
+
+    if (!customer) {
+      return res.status(404).json({
+        success: false,
+        message: "Customer not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Customer profile fetched",
+      data: customer
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.create = async (req, res, next) => {
   try {
     res.status(201).json({
