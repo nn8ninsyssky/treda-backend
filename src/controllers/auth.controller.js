@@ -23,73 +23,7 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken };
 };
 
-/**
- * REGISTER
- */
 
-
-
-exports.register = async (req, res, next) => {
-  try {
-    const {
-      name,
-      email,
-      password,
-      customer_phone,
-      customer_alt_phone,
-      customer_aadhaar_no,
-      customer_village,
-      customer_block,
-      customer_district,
-      customer_state,
-      customer_country,
-      customer_latitude,
-      customer_longitude,
-      customer_pincode
-    } = req.body;
-
-    // 🔍 Check existing
-    const existing = await Customer.findOne({
-      where: { customer_email: email }
-    });
-
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: 'Customer already exists',
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // ✅ Create customer directly
-    const customer = await Customer.create({
-      customer_name: name,
-      customer_email: email,
-      
-      customer_phone,
-      customer_alt_phone,
-      customer_aadhaar_no,
-      customer_village,
-      customer_block,
-      customer_district,
-      customer_state,
-      customer_country,
-      customer_latitude,
-      customer_longitude,
-      customer_pincode,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Customer registered successfully',
-      data: customer,
-    });
-
-  } catch (err) {
-    next(err);
-  }
-};
 
 // Registration //
 
