@@ -55,7 +55,7 @@ const generalLimiter = rateLimit({
 // ── Strict rate limiter (auth routes only) ────────────
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,   // 15 minutes
-  max: 1000,                     // only 10 login attempts per IP
+  max: 10,                     // only 10 login attempts per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many login attempts. Please try after 15 minutes.' },
@@ -113,7 +113,7 @@ await sequelize.sync();
     //   logger.info(`TREDA server running on port ${PORT} [${process.env.NODE_ENV}]`);
     // });
     app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on https://treda-backend-87yc.onrender.com:${PORT}`);
 });
   } catch (err) {
     logger.error('Failed to start server:', err);

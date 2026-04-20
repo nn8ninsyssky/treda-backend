@@ -46,3 +46,15 @@ const getComplaintById = async (complaint_id) => {
     visit_log:        mongoData?.visit_log        || [],
   };
 };
+
+async function createComplaint(data){
+  const complaint= await pg.insert("complaints",data);
+  await mongo.insert("complaint_logs",{
+    complaintId:complaint.id,
+    complaint_description:data.longText,
+    complaint_resolution_notes:data.notes,
+    complaint_visit_notes:data.visit_notes,
+  });
+  await sendNotification();
+  return complaint;
+}

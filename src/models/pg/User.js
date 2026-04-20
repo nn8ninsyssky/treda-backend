@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize');
-const {sequelize} = require('../../config/db.postgres');
+const { sequelize } = require('../../config/db.postgres');
 
 const User = sequelize.define('User', {
   id: {
@@ -7,10 +7,12 @@ const User = sequelize.define('User', {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
+
   name: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+
   email: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -19,10 +21,12 @@ const User = sequelize.define('User', {
       isEmail: true,
     },
   },
+
   password: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+
   role: {
     type: DataTypes.ENUM(
       'admin',
@@ -32,15 +36,19 @@ const User = sequelize.define('User', {
       'customer'
     ),
     allowNull: false,
+    defaultValue: 'customer'
   },
-   createdAt: {
-      type: DataTypes.DATE,
-      field: "created_at"
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-      field: "updated_at"
-    }
+
+  createdAt: {
+    type: DataTypes.DATE,
+    field: "created_at"
+  },
+
+  // updatedAt: {
+  //   type: DataTypes.DATE,
+  //   field: "updated_at"
+  // }
+
 }, {
   tableName: 'users',
   timestamps: true,

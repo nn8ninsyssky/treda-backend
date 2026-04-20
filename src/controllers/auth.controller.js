@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const logger = require('../utils/logger');
-const { User, Customer } = require('../models/pg');
+const { User, Customer,sequelize } = require('../models/pg');
 
 
 /**
@@ -30,71 +30,82 @@ const generateTokens = (user) => {
 
 exports.register = async (req, res, next) => {
   try {
-    console.log("✅ REGISTER API CALLED");
+    logger.info("✅ REGISTER API CALLED");
 
     const {
-      name, email, password, role,
-      phone, alt_phone, adhaar,
+      name, email, password, 
+      phone, alt_phone, aadhaar,
       village, block, district, state, country,
       latitude, longitude, pincode
     } = req.body;
 
-    // 1️⃣ Check if user exists
     const existing = await User.findOne({ where: { email } });
     if (existing) {
       return res.status(400).json({
         success: false,
         message: 'User already exists'
       });
+      
+    
     }
 
-    // 2️⃣ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 3️⃣ Create USER
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      role
-    });
+    let user; // ✅ FIX
 
-    // 4️⃣ If CUSTOMER → create profile
-    if (role === 'customer') {
-      await Customer.create({
-        user_id: user.id,
-        customer_name: name,
-        customer_email: email,
-        customer_phone: phone,
-        customer_alt_phone: alt_phone,
-        customer_aadhaar_no: adhaar,
-        customer_village: village,
-        customer_block: block,
-        customer_district: district,
-        customer_state: state,
-        customer_country: country,
-        customer_latitude: latitude,
-        customer_longitude: longitude,
-        customer_pincode: pincode,
-      });
+    const t = await sequelize.transaction();
+
+    try {
+      user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        role:'customer'
+      }, { transaction: t });
+
+   logger.info(`User registered: ${user.id}`);
+        await Customer.create({
+          user_id: user.id,
+          customer_name: name,
+          
+          customer_phone: phone,
+          customer_alt_phone: alt_phone,
+          customer_aadhaar_no: aadhaar,
+          customer_village: village,
+          customer_block: block,
+          customer_district: district,
+          customer_state: state,
+          customer_country: country,
+          customer_latitude: latitude,
+          customer_longitude: longitude,
+          customer_pincode: pincode,
+        }, { transaction: t });
+      
+
+      await t.commit();
+
+    } catch (err) {
+      await t.rollback();
+      throw err;
     }
+const tokens = generateTokens(user);
 
-    // 5️⃣ Generate JWT
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
-    );
+res.status(201).json({
+  success: true,
+  message: 'Registration successful',
+  ...tokens,
+  user: {
+    id: user.id,
+    email: user.email,
+    role: user.role
+  }
+});
+    
 
-    res.status(201).json({
-      success: true,
-      message: 'Registration successful',
-      token,
-      user_id: user.id
-    });
+    
 
   } catch (err) {
-    next(err);
+    next(err); // ✅ VERY IMPORTANT
   }
 };
 
@@ -108,10 +119,16 @@ exports.login = async (req, res, next) => {
 
     // 1️⃣ Find user (NOT customer)
     const user = await User.findOne({
-      where: { email },
-      attributes: { include: ['password'] }  // ⭐ FIX
-      
-    });
+  where: { email },
+    attributes: { include: ['password'] }, // ✅ ADD THIS
+
+  include: [
+    {
+      model: Customer,
+      as: 'customer'
+    }
+  ]
+});
 
     if (!user) {
       return res.status(401).json({
@@ -133,18 +150,29 @@ exports.login = async (req, res, next) => {
     // 3️⃣ Generate tokens
     const tokens = generateTokens(user);
 
+    let customer = user.customer;
+
+if (!customer) {
+  customer = await Customer.create({
+    user_id: user.id,
+    customer_name: user.name
+  });
+}
     res.json({
-      success: true,
-      message: 'Login successful',
-      ...tokens,
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role
-      }
-    });
+  success: true,
+  message: 'Login successful',
+  ...tokens,
+  user: {
+    id: user.id,
+    email: user.email,
+    role: user.role
+  },
+  customer
+});
+logger.info(`User registered: ${user.id}`);
 
   } catch (err) {
+    logger.error(err.message);
     next(err);
   }
 };
@@ -160,7 +188,8 @@ exports.refresh = async (req, res, next) => {
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    const user = users.find((u) => u.id === decoded.id);
+    const user = await User.findByPk(decoded.id); // ✅ FIX
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -174,6 +203,7 @@ exports.refresh = async (req, res, next) => {
       success: true,
       ...tokens,
     });
+
   } catch (err) {
     next(err);
   }

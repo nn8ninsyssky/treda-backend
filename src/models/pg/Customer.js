@@ -1,8 +1,8 @@
 const { DataTypes } = require('sequelize');
-const {sequelize} = require('../../config/db.postgres');
+const { sequelize } = require('../../config/db.postgres');
 
 const Customer = sequelize.define('Customer', {
-  customer_id: {
+  id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
@@ -12,17 +12,6 @@ const Customer = sequelize.define('Customer', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-
-  customer_email: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-
-  // customer_password: {   // 🔐 ADD THIS (IMPORTANT)
-  //   type: DataTypes.STRING,
-  //   allowNull: false,
-  // },
 
   customer_phone: DataTypes.STRING,
   customer_alt_phone: DataTypes.STRING,
@@ -35,22 +24,20 @@ const Customer = sequelize.define('Customer', {
   customer_latitude: DataTypes.DOUBLE,
   customer_longitude: DataTypes.DOUBLE,
   customer_pincode: DataTypes.STRING,
-user_id: {
-  type: DataTypes.UUID,
-  allowNull: false,
-  references: {
-    model: 'users',
-    key: 'id'
-  }
-},
-  customer_registered_at: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  }
+
+  user_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    }
+  },
 
 }, {
   tableName: 'customers',
-  timestamps: false,
+  timestamps: true,
+  underscored: true
 });
 
 module.exports = Customer;
