@@ -21,6 +21,7 @@ const validate = (schema) => {
       }
 
       req.body = value;
+      console.log("VALIDATED BODY:", value);
       next();
     } catch (err) {
       next(err);

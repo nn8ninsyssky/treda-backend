@@ -38,7 +38,7 @@ exports.register = async (req, res, next) => {
       village, block, district, state, country,
       latitude, longitude, pincode
     } = req.body;
-
+logger.info("REQUEST BODY:", req.body);
     const existing = await User.findOne({ where: { email } });
     if (existing) {
       return res.status(400).json({
