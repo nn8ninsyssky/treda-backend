@@ -33,7 +33,7 @@ exports.register = async (req, res, next) => {
     logger.info("✅ REGISTER API CALLED");
 
     const {
-      name, email, password, 
+      name, email, password, role,
       phone, alt_phone, aadhaar,
       village, block, district, state, country,
       latitude, longitude, pincode
@@ -60,7 +60,7 @@ exports.register = async (req, res, next) => {
         name,
         email,
         password: hashedPassword,
-        
+        role
       }, { transaction: t });
 
    logger.info(`User registered: ${user.id}`);
