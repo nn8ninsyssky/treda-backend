@@ -105,7 +105,22 @@ res.status(201).json({
     
 
   } catch (err) {
-    next(err); // ✅ VERY IMPORTANT
+    console.log("❌ FULL ERROR:", err);
+
+  if (err.errors) {
+    err.errors.forEach(e => {
+      console.log("➡️", e.message);
+    });
+  }
+
+  logger.error(err.message);
+
+  return res.status(500).json({
+    success: false,
+    message: err.message,
+    details: err.errors || null
+  });
+    //next(err); // ✅ VERY IMPORTANT
   }
 };
 
