@@ -44,10 +44,10 @@ const User = sequelize.define('User', {
     field: "created_at"
   },
 
-  // updatedAt: {
-  //   type: DataTypes.DATE,
-  //   field: "updated_at"
-  // }
+  updatedAt: {
+    type: DataTypes.DATE,
+    field: "updated_at"
+  }
 
 }, {
   tableName: 'users',
