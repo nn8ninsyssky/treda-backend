@@ -60,7 +60,7 @@ exports.register = async (req, res, next) => {
         name,
         email,
         password: hashedPassword,
-        role:'customer'
+        
       }, { transaction: t });
 
    logger.info(`User registered: ${user.id}`);
