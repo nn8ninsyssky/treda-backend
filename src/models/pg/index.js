@@ -13,6 +13,8 @@ Customer.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user'
 });
+
+User.hasOne(Vendor, { as: 'vendor', foreignKey: 'user_id' });
 Vendor.belongsTo(User, {
   foreignKey: 'user_id',
   as: 'user'
