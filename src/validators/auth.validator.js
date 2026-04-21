@@ -21,6 +21,12 @@ role: Joi.string().valid('customer','vendor').required(),
   latitude: Joi.number().optional(),
   longitude: Joi.number().optional(),
   pincode: Joi.string().optional(),
+
+
+   // 🔥 ADD THESE
+  company_reg_no: Joi.string().optional(),
+  vendor_gst_no: Joi.string().optional(),
+  vendor_contact_person_name: Joi.string().optional(),
 });
 
 exports.loginSchema = Joi.object({
