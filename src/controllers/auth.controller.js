@@ -33,11 +33,17 @@ exports.register = async (req, res, next) => {
     logger.info("✅ REGISTER API CALLED");
 
     const {
-      name, email, password, role,
-      phone, alt_phone, aadhaar,
-      village, block, district, state, country,
-      latitude, longitude, pincode
-    } = req.body;
+  name, email, password, role,
+  phone, alt_phone, aadhaar,
+  village, block, district, state, country,
+  latitude, longitude, pincode,
+
+  // ✅ ADD THESE
+  company_reg_no,
+  vendor_gst_no,
+  vendor_contact_person_name
+
+} = req.body;
 logger.info("REQUEST BODY:", req.body);
     const existing = await User.findOne({ where: { email } });
     if (existing) {
@@ -83,13 +89,21 @@ logger.info("REQUEST BODY:", req.body);
         }, { transaction: t });
         }else if(role==='vendor'){
 await Vendor.create({
-    user_id: user.id,
-    vendor_name: name,
-    vendor_phone: phone,
-    vendor_district: district,
-    vendor_state: state,
-    vendor_country: country,
-  }, { transaction: t });
+  user_id: user.id,
+  vendor_name: name,
+  vendor_phone: phone,
+  vendor_district: district,
+  vendor_state: state,
+  vendor_country: country,
+
+  // ✅ ADD THESE
+  company_reg_no,
+  vendor_gst_no,
+  vendor_contact_person_name,
+  vendor_latitude: latitude,
+  vendor_longitude: longitude
+
+}, { transaction: t });
         }
       
 
@@ -190,6 +204,12 @@ if (user.role === 'customer') {
 
 } else if (user.role === 'vendor') {
   profile = user.vendor;
+  if (!profile) {
+    profile = await Vendor.create({
+      user_id: user.id,
+      vendor_name: user.name
+    });
+  }
 }
     
     res.json({
