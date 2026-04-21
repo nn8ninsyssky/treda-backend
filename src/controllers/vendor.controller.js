@@ -1,5 +1,6 @@
 const { User } = require('../models/pg');
 const bcrypt = require('bcrypt');
+const { Vendor } = require('../models/pg');
 
 exports.createVendor = async (req, res, next) => {
   try {
@@ -57,24 +58,38 @@ exports.getOne = async (req, res, next) => {
   }
 };
 
-exports.update = async (req, res, next) => {
+exports.updateMyVendor = async (req, res, next) => {
   try {
+    const userId = req.user.id;
+
+    const vendor = await Vendor.findOne({
+      where: { user_id: userId }
+    });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor profile not found"
+      });
+    }
+
+    // ✅ Update only provided fields
+    Object.keys(req.body).forEach(key => {
+      if (req.body[key] !== undefined) {
+        vendor[key] = req.body[key];
+      }
+    });
+
+    await vendor.save();
+
     res.json({
       success: true,
-      message: `Updated record ${req.params.id}`,
+      message: "Vendor updated successfully",
+      data: vendor
     });
+
   } catch (err) {
     next(err);
   }
 };
 
-exports.delete = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: `Deleted record ${req.params.id}`,
-    });
-  } catch (err) {
-    next(err);
-  }
-};

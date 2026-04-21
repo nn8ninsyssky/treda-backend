@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const validate = require('../middlewares/validate');
+const { updateVendorSchema } = require('../validators/vendor.validator');
 
 
 const authenticate = require('../middlewares/auth');
@@ -19,10 +21,15 @@ router.get(
   allowRoles(ROLES.ADMIN, ROLES.TREDA_OFFICER),
   controller.getAll
 );
-// router.get('/', authenticate, controller.getAll);
-//router.post('/', authenticate, controller.create);
-router.get('/:id', authenticate, controller.getOne);
-router.put('/:id', authenticate, controller.update);
-router.delete('/:id', authenticate, controller.delete);
+
+router.put(
+  '/me',
+  authenticate,
+  allowRoles(ROLES.VENDOR),
+  validate(updateVendorSchema),
+  controller.updateMyVendor
+);
+
+console.log(controller);
 
 module.exports = router;
