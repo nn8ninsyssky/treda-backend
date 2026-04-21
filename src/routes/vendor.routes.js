@@ -21,6 +21,7 @@ router.get(
   allowRoles(ROLES.ADMIN, ROLES.TREDA_OFFICER),
   controller.getAll
 );
+router.get("/:id", authenticate, controller.getOne);
 
 router.put(
   '/me',
@@ -30,6 +31,6 @@ router.put(
   controller.updateMyVendor
 );
 
-console.log(controller);
+
 
 module.exports = router;

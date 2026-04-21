@@ -37,11 +37,16 @@ exports.createVendor = async (req, res, next) => {
 
 exports.getAll = async (req, res, next) => {
   try {
+    const vendors = await Vendor.findAll({
+      attributes: { exclude: ['createdAt', 'updatedAt'] }
+    });
+
     res.json({
       success: true,
-      message: 'Fetched all records',
-      data: [],
+      message: 'All vendors fetched successfully',
+      data: vendors
     });
+
   } catch (err) {
     next(err);
   }
@@ -49,10 +54,25 @@ exports.getAll = async (req, res, next) => {
 
 exports.getOne = async (req, res, next) => {
   try {
+    const { id } = req.params;
+
+    const vendor = await Vendor.findOne({
+      where: { vendor_id: id }
+    });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: 'Vendor not found'
+      });
+    }
+
     res.json({
       success: true,
-      message: `Fetched record ${req.params.id}`,
+      message: 'Vendor fetched successfully',
+      data: vendor
     });
+
   } catch (err) {
     next(err);
   }
@@ -74,11 +94,24 @@ exports.updateMyVendor = async (req, res, next) => {
     }
 
     // ✅ Update only provided fields
-    Object.keys(req.body).forEach(key => {
-      if (req.body[key] !== undefined) {
-        vendor[key] = req.body[key];
-      }
-    });
+   const allowedFields = [
+  "vendor_name",
+  "company_reg_no",
+  "vendor_gst_no",
+  "vendor_contact_person_name",
+  "vendor_phone",
+  "vendor_district",
+  "vendor_state",
+  "vendor_country",
+  "vendor_latitude",
+  "vendor_longitude"
+];
+
+allowedFields.forEach(field => {
+  if (req.body[field] !== undefined) {
+    vendor[field] = req.body[field];
+  }
+});
 
     await vendor.save();
 
