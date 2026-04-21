@@ -97,9 +97,9 @@ await Vendor.create({
   vendor_country: country,
 
   // ✅ ADD THESE
-  company_reg_no,
-  vendor_gst_no,
-  vendor_contact_person_name,
+  company_reg_no:company_reg_no,
+  vendor_gst_no:vendor_gst_no,
+  vendor_contact_person_name:vendor_contact_person_name,
   vendor_latitude: latitude,
   vendor_longitude: longitude
 
