@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const logger = require('../utils/logger');
-const { User, Customer,sequelize } = require('../models/pg');
+const { User, Customer,Vendor,sequelize } = require('../models/pg');
 
 
 /**
@@ -64,7 +64,8 @@ logger.info("REQUEST BODY:", req.body);
       }, { transaction: t });
 
    logger.info(`User registered: ${user.id}`);
-        await Customer.create({
+        if(role==='customer'){
+          await Customer.create({
           user_id: user.id,
           customer_name: name,
           
@@ -80,6 +81,16 @@ logger.info("REQUEST BODY:", req.body);
           customer_longitude: longitude,
           customer_pincode: pincode,
         }, { transaction: t });
+        }else if(role==='vendor'){
+await Vendor.create({
+    user_id: user.id,
+    vendor_name: name,
+    vendor_phone: phone,
+    vendor_district: district,
+    vendor_state: state,
+    vendor_country: country,
+  }, { transaction: t });
+        }
       
 
       await t.commit();
@@ -141,7 +152,8 @@ exports.login = async (req, res, next) => {
     {
       model: Customer,
       as: 'customer'
-    }
+    },
+    { model: Vendor, as: 'vendor' }
   ]
 });
 
@@ -164,15 +176,22 @@ exports.login = async (req, res, next) => {
 
     // 3️⃣ Generate tokens
     const tokens = generateTokens(user);
+let profile = null;
 
-    let customer = user.customer;
+if (user.role === 'customer') {
+  profile = user.customer;
 
-if (!customer) {
-  customer = await Customer.create({
-    user_id: user.id,
-    customer_name: user.name
-  });
+  if (!profile) {
+    profile = await Customer.create({
+      user_id: user.id,
+      customer_name: user.name
+    });
+  }
+
+} else if (user.role === 'vendor') {
+  profile = user.vendor;
 }
+    
     res.json({
   success: true,
   message: 'Login successful',
@@ -182,9 +201,9 @@ if (!customer) {
     email: user.email,
     role: user.role
   },
-  customer
+  profile
 });
-logger.info(`User registered: ${user.id}`);
+logger.info(`User logged in: ${user.id}`);
 
   } catch (err) {
     logger.error(err.message);

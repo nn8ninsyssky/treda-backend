@@ -26,10 +26,10 @@ const allowRoles = (...roles) => {
       });
     }
 
-    if (!roles.includes(req.user.role)) {
-      logger.warn(
-        `Forbidden: role '${req.user.role}' tried ${req.method} ${req.originalUrl}`
-      );
+if (!roles.map(r => r.toLowerCase()).includes(req.user.role.toLowerCase())) {
+        logger.warn(
+  `Forbidden: user ${req.user.id} with role '${req.user.role}' tried ${req.method} ${req.originalUrl}`
+);
       return res.status(403).json({
         success: false,
         message: 'Access denied. You do not have permission for this action.',
@@ -49,12 +49,22 @@ const allowRoles = (...roles) => {
  *   router.get('/:id', authenticate, isSelfOrAdmin, handler)
  */
 const isSelfOrAdmin = (req, res, next) => {
+  if (!req.user) {
+  return res.status(401).json({
+    success: false,
+    message: 'Not authenticated.',
+  });
+}
+
   const { id, role } = req.user;
   const bypassRoles   = [ROLES.ADMIN, ROLES.TREDA_OFFICER];
 
-  if (bypassRoles.includes(role) || id === req.params.id) {
-    return next();
-  }
+  if (
+  bypassRoles.includes(role) ||
+  (req.params.id && id === req.params.id)
+) {
+  return next();
+}
 
   logger.warn(
     `Ownership check failed: user ${id} tried to access resource ${req.params.id}`
