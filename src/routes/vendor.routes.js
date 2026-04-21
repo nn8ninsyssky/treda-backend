@@ -15,13 +15,25 @@ router.post(
   allowRoles('treda_officer'),
   controller.createVendor
 );
+
+
 router.get(
   "/",
   authenticate,
   allowRoles(ROLES.ADMIN, ROLES.TREDA_OFFICER),
   controller.getAll
 );
+
+
 router.get("/:id", authenticate, controller.getOne);
+
+router.get(
+  "/me",
+  authenticate,
+  allowRoles(ROLES.VENDOR),
+  controller.getMyVendor
+);
+
 
 router.put(
   '/me',
@@ -31,6 +43,11 @@ router.put(
   controller.updateMyVendor
 );
 
-
+router.delete(
+  '/:id',
+  authenticate,
+  allowRoles(ROLES.ADMIN, ROLES.TREDA_OFFICER),
+  controller.delete
+);
 
 module.exports = router;

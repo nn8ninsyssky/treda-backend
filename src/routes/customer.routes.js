@@ -5,14 +5,48 @@ const controller = require('../controllers/customer.controller') ;
 const authenticate = require('../middlewares/auth');
 
 
-// GET logged-in customer
-router.get("/me", authenticate, controller.getProfile);
+const validate = require('../middlewares/validate');
+const { updatecustomerSchema } = require('../validators/customer.validator');
 
 
-// router.get('/', authenticate, controller.getAll);
-router.post('/', authenticate, controller.create);
+const { allowRoles,ROLES } = require('../middlewares/roleCheck');
+
+
+router.post(
+  '/',
+  authenticate,
+  
+  controller.createCustomer
+);
+
+router.get(
+  '/',
+  authenticate,
+  allowRoles(ROLES.ADMIN, ROLES.TREDA_OFFICER),
+  controller.getAll
+);
+
 router.get('/:id', authenticate, controller.getOne);
-router.put('/:id', authenticate, controller.update);
-router.delete('/:id', authenticate, controller.delete);
 
+router.get(
+  '/me',
+  authenticate,
+  allowRoles(ROLES.CUSTOMER),
+  controller.getMyCustomer
+);
+
+router.put(
+  '/me',
+  authenticate,
+  allowRoles(ROLES.CUSTOMER),
+  validate(updatecustomerSchema),
+  controller.updateMyCustomer
+);
+
+router.delete(
+  '/:id',
+  authenticate,
+  allowRoles(ROLES.ADMIN, ROLES.TREDA_OFFICER),
+  controller.delete
+);
 module.exports = router;

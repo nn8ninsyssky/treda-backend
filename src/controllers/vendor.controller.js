@@ -37,14 +37,45 @@ exports.createVendor = async (req, res, next) => {
 
 exports.getAll = async (req, res, next) => {
   try {
-    const vendors = await Vendor.findAll({
-      attributes: { exclude: ['createdAt', 'updatedAt'] }
+    const { district, state, search, page = 1, limit = 10 } = req.query;
+
+    // 🔥 WHERE CONDITION
+    const where = {};
+
+    if (district) {
+      where.vendor_district = district;
+    }
+
+    if (state) {
+      where.vendor_state = state;
+    }
+
+    // 🔍 SEARCH (case-insensitive)
+    if (search) {
+      const { Op } = require("sequelize");
+
+      where.vendor_name = {
+        [Op.iLike]: `%${search}%`
+      };
+    }
+
+    // 📄 PAGINATION
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await Vendor.findAndCountAll({
+      where,
+      attributes: { exclude: ['createdAt', 'updatedAt'] },
+      limit: parseInt(limit),
+      offset: parseInt(offset)
     });
 
     res.json({
       success: true,
-      message: 'All vendors fetched successfully',
-      data: vendors
+      message: 'Vendors fetched successfully',
+      total: count,
+      page: parseInt(page),
+      totalPages: Math.ceil(count / limit),
+      data: rows
     });
 
   } catch (err) {
@@ -107,6 +138,7 @@ exports.updateMyVendor = async (req, res, next) => {
   "vendor_longitude"
 ];
 
+
 allowedFields.forEach(field => {
   if (req.body[field] !== undefined) {
     vendor[field] = req.body[field];
@@ -126,3 +158,58 @@ allowedFields.forEach(field => {
   }
 };
 
+exports.getMyVendor = async (req, res, next) => {
+  try {
+    const vendor = await Vendor.findOne({
+      where: { user_id: req.user.id }
+    });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      data: vendor
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.delete = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const vendor = await Vendor.findOne({
+      where: { vendor_id: id }
+    });
+
+    if (!vendor) {
+      return res.status(404).json({
+        success: false,
+        message: "Vendor not found"
+      });
+    }
+
+    // 🔥 delete linked user
+    await User.destroy({
+      where: { id: vendor.user_id }
+    });
+
+    // delete vendor
+    await vendor.destroy();
+
+    res.json({
+      success: true,
+      message: "Vendor and user deleted successfully"
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
