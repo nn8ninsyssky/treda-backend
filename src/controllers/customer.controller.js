@@ -60,17 +60,7 @@ exports.getMyCustomer = async (req, res, next) => {
   }
 };
 
-// exports.create = async (req, res, next) => {
-//   try {
-//     res.status(201).json({
-//       success: true,
-//       message: 'Created successfully',
-//       data: req.body,
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+
 
 exports.getAll = async (req, res, next) => {
   try {
