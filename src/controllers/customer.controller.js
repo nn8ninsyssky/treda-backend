@@ -33,7 +33,7 @@ const bcrypt = require('bcrypt');
 //     next(err);
 //   }
 // };
-
+const { callSP } = require('../config/db.postgres');
 
 exports.getMyCustomer = async (req, res, next) => {
   try {

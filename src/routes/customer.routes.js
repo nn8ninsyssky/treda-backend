@@ -12,19 +12,9 @@ const { updatecustomerSchema } = require('../validators/customer.validator');
 const { allowRoles,ROLES } = require('../middlewares/roleCheck');
 
 
-router.post(
-  '/',
-  authenticate,
-  
-  controller.createCustomer
-);
 
-router.get(
-  '/',
-  authenticate,
-  allowRoles(ROLES.ADMIN, ROLES.TREDA_OFFICER),
-  controller.getAll
-);
+
+
 
 // router.get('/:id', authenticate, controller.getOne);
 
