@@ -55,7 +55,8 @@ exports.updateMyCustomer = async (req, res, next) => {
       `SELECT sp_update_customer(:user_id, :data)`,
       {
         user_id: req.user.id,
-        data: JSON.stringify(req.body)
+        //data: JSON.stringify(req.body)
+        data: req.body
       }
     );
 
