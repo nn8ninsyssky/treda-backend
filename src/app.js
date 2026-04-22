@@ -108,7 +108,7 @@ const startServer = async () => {
     await connectMongo();
 
     require('./models/pg'); // registers all models + associations
-await sequelize.sync();
+//await sequelize.sync();
     // app.listen(PORT, () => {
     //   logger.info(`TREDA server running on port ${PORT} [${process.env.NODE_ENV}]`);
     // });

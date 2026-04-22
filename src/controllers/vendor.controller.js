@@ -83,31 +83,31 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
-exports.getOne = async (req, res, next) => {
-  try {
-    const { id } = req.params;
+// exports.getOne = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
 
-    const vendor = await Vendor.findOne({
-      where: { vendor_id: id }
-    });
+//     const vendor = await Vendor.findOne({
+//       where: { vendor_id: id }
+//     });
 
-    if (!vendor) {
-      return res.status(404).json({
-        success: false,
-        message: 'Vendor not found'
-      });
-    }
+//     if (!vendor) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Vendor not found'
+//       });
+//     }
 
-    res.json({
-      success: true,
-      message: 'Vendor fetched successfully',
-      data: vendor
-    });
+//     res.json({
+//       success: true,
+//       message: 'Vendor fetched successfully',
+//       data: vendor
+//     });
 
-  } catch (err) {
-    next(err);
-  }
-};
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 exports.updateMyVendor = async (req, res, next) => {
   try {

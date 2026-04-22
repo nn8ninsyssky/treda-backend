@@ -23,4 +23,15 @@ const connectPostgres = async () => {
   }
 };
 
-module.exports = { sequelize, connectPostgres };
+const callSP = async (query, params = []) => {
+  try {
+    const [result] = await sequelize.query(query, {
+      replacements: params,
+    });
+    return result;
+  } catch (err) {
+    throw err;
+  }
+};
+
+module.exports = { sequelize, connectPostgres, callSP };
