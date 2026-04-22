@@ -99,28 +99,28 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
-exports.getOne = async (req, res, next) => {
-  try {
-    const customer = await Customer.findOne({
-      where: { id: req.params.id }
-    });
+// exports.getOne = async (req, res, next) => {
+//   try {
+//     const customer = await Customer.findOne({
+//       where: { id: req.params.id }
+//     });
 
-    if (!customer) {
-      return res.status(404).json({
-        success: false,
-        message: "Customer not found"
-      });
-    }
+//     if (!customer) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Customer not found"
+//       });
+//     }
 
-    res.json({
-      success: true,
-      data: customer
-    });
+//     res.json({
+//       success: true,
+//       data: customer
+//     });
 
-  } catch (err) {
-    next(err);
-  }
-};
+//   } catch (err) {
+//     next(err);
+//   }
+// };
 
 exports.updateMyCustomer = async (req, res, next) => {
   try {

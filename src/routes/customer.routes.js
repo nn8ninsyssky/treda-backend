@@ -26,7 +26,7 @@ router.get(
   controller.getAll
 );
 
-router.get('/:id', authenticate, controller.getOne);
+// router.get('/:id', authenticate, controller.getOne);
 
 router.get(
   '/me',

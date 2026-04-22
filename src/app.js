@@ -46,7 +46,7 @@ app.use((req, res, next) => {
 // ── General rate limiter (all routes) ─────────────────
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,   // 15 minutes
-  max: 1000,                    // 100 requests per IP
+  max: 100,                    // 100 requests per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many requests. Please try again later.' },
@@ -55,7 +55,7 @@ const generalLimiter = rateLimit({
 // ── Strict rate limiter (auth routes only) ────────────
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,   // 15 minutes
-  max: 10,                     // only 10 login attempts per IP
+  max: 100,                     // only 10 login attempts per IP
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many login attempts. Please try after 15 minutes.' },
