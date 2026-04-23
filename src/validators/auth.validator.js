@@ -61,3 +61,7 @@ exports.loginVendorSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
+exports.loginTredaOfficerSchema = Joi.object({
+  email: Joi.string().email().required(),
+  password: Joi.string().required(),
+});

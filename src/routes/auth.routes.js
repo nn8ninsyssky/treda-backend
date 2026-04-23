@@ -10,6 +10,7 @@ const {
   loginCustomerSchema,
   registerVendorSchema,
   loginVendorSchema,
+  loginTredaOfficerSchema,
   refreshSchema
 } = require('../validators/auth.validator');
 
@@ -49,6 +50,14 @@ router.post(
 
   validate(loginVendorSchema),
   controller.loginVendor
+);
+
+// LOGIN Treda Officer
+router.post(
+  '/login/treda/admin',
+
+  validate(loginTredaOfficerSchema),
+  controller.loginTredaAdmin
 );
 // REFRESH
 router.post(

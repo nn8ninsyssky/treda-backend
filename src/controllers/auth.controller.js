@@ -180,6 +180,38 @@ exports.loginVendor = async (req, res, next) => {
   }
 };
 
+
+// Treda Admin Login
+exports.loginTredaAdmin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    const result = await callSP(
+      `SELECT sp_login_admin(:email, :password)`,
+      { email, password }
+    );
+
+    const response = result[0].sp_login_admin;
+
+    if (!response.success) {
+      return res.status(401).json(response);
+    }
+
+    const tokens = generateTokens({
+      id: response.user.id,
+      role: response.user.role,
+      name: response.user.name
+    });
+
+    res.json({
+      ...response,
+      ...tokens
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
 /**
  * REFRESH TOKEN
  */
