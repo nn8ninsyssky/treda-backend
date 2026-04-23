@@ -117,7 +117,8 @@ exports.registerVendor = async (req, res, next) => {
   lat, long
 } = req.body;
 
-    
+    logger.push("Body:",req.body);
+    console.log("Body:",req.body);
     const result= await callSP(
   `SELECT sp_register_vendor(
     :name, :email, :password,
@@ -135,7 +136,8 @@ exports.registerVendor = async (req, res, next) => {
   }
 );
     const response = result[0].sp_register_vendor;
-
+logger.push("response",response);
+console.log("response",response);
     if (!response.success) {
       return res.status(400).json(response);
     }
