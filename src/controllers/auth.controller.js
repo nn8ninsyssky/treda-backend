@@ -28,7 +28,7 @@ const generateTokens = (user) => {
 
 // Registration //
 
-exports.register = async (req, res, next) => {
+exports.registerCustomer = async (req, res, next) => {
   try {
     const {
       name, email, password,
@@ -76,85 +76,7 @@ exports.register = async (req, res, next) => {
  * LOGIN
  */
 
-// exports.login = async (req, res, next) => {
-//   try {
-//     const { email, password } = req.body;
-
-//     // 1️⃣ Find user (NOT customer)
-//     const user = await User.findOne({
-//   where: { email },
-//     attributes: { include: ['password'] }, // ✅ ADD THIS
-
-//   include: [
-//     {
-//       model: Customer,
-//       as: 'customer'
-//     },
-//     { model: Vendor, as: 'vendor' }
-//   ]
-// });
-
-//     if (!user) {
-//       return res.status(401).json({
-//         success: false,
-//         message: 'Invalid credentials',
-//       });
-//     }
-
-//     // 2️⃣ Compare password
-//     const isMatch = await bcrypt.compare(password, user.password);
-
-//     if (!isMatch) {
-//       return res.status(401).json({
-//         success: false,
-//         message: 'Invalid credentials',
-//       });
-//     }
-
-//     // 3️⃣ Generate tokens
-//     const tokens = generateTokens(user);
-// let profile = null;
-
-// if (user.role === 'customer') {
-//   profile = user.customer;
-
-//   if (!profile) {
-//     profile = await Customer.create({
-//       user_id: user.id,
-//       customer_name: user.name
-//     });
-//   }
-
-// } else if (user.role === 'vendor') {
-//   profile = user.vendor;
-//   if (!profile) {
-//     profile = await Vendor.create({
-//       user_id: user.id,
-//       vendor_name: user.name
-//     });
-//   }
-// }
-    
-//     res.json({
-//   success: true,
-//   message: 'Login successful',
-//   ...tokens,
-//   user: {
-//     id: user.id,
-//     email: user.email,
-//     role: user.role
-//   },
-//   profile
-// });
-// logger.info(`User logged in: ${user.id}`);
-
-//   } catch (err) {
-//     logger.error(err.message);
-//     next(err);
-//   }
-// };
-
-exports.login = async (req, res, next) => {
+exports.loginCustomer = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -170,6 +92,83 @@ exports.login = async (req, res, next) => {
     }
 
     const tokens = generateTokens(response.user);
+
+    res.json({
+      ...response,
+      ...tokens
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+//Vendor registration
+
+exports.registerVendor = async (req, res, next) => {
+  try {
+    const {
+      name, email, password,
+      vendor_name, company_reg_no, vendor_gst_no,
+      vendor_contact_person_name, vendor_phone,
+      vendor_district, vendor_state, vendor_country,
+      vendor_latitude, vendor_longitude
+    } = req.body;
+
+    const result = await callSP(
+      `SELECT sp_register_vendor(
+        :name, :email, :password,
+        :vendor_name, :company_reg_no, :vendor_gst_no,
+        :vendor_contact_person_name, :vendor_phone,
+        :vendor_district, :vendor_state, :vendor_country,
+        :vendor_latitude, :vendor_longitude
+      )`,
+      {
+        name, email, password,
+        vendor_name, company_reg_no, vendor_gst_no,
+        vendor_contact_person_name, vendor_phone,
+        vendor_district, vendor_state, vendor_country,
+        vendor_latitude, vendor_longitude
+      }
+    );
+
+    const response = result[0].sp_register_vendor;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    res.status(201).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+// vendor login
+
+exports.loginVendor = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    const result = await callSP(
+      `SELECT sp_login_vendor(:email, :password)`,
+      { email, password }
+    );
+
+    const response = result[0].sp_login_vendor;
+
+    if (!response.success) {
+      return res.status(401).json(response);
+    }
+
+    const tokens = generateTokens({
+      id: response.user_id,
+      role: response.role,
+      name: response.name
+    });
 
     res.json({
       ...response,
