@@ -108,31 +108,54 @@ exports.loginCustomer = async (req, res, next) => {
 
 exports.registerVendor = async (req, res, next) => {
   try {
+    // const {
+    //   name, email, password,
+    //   vendor_name, company_reg_no, vendor_gst_no,
+    //   vendor_contact_person_name, vendor_phone,
+    //   vendor_district, vendor_state, vendor_country,
+    //   vendor_latitude, vendor_longitude
+    // } = req.body;
     const {
-      name, email, password,
-      vendor_name, company_reg_no, vendor_gst_no,
-      vendor_contact_person_name, vendor_phone,
-      vendor_district, vendor_state, vendor_country,
-      vendor_latitude, vendor_longitude
-    } = req.body;
+  name, email, password,
+  vendor_name, company_reg_no, vendor_gst_no,
+  contact_person, vendor_phone,
+  district, state, country,
+  lat, long
+} = req.body;
 
-    const result = await callSP(
-      `SELECT sp_register_vendor(
-        :name, :email, :password,
-        :vendor_name, :company_reg_no, :vendor_gst_no,
-        :vendor_contact_person_name, :vendor_phone,
-        :vendor_district, :vendor_state, :vendor_country,
-        :vendor_latitude, :vendor_longitude
-      )`,
-      {
-        name, email, password,
-        vendor_name, company_reg_no, vendor_gst_no,
-        vendor_contact_person_name, vendor_phone,
-        vendor_district, vendor_state, vendor_country,
-        vendor_latitude, vendor_longitude
-      }
-    );
+    // const result = await callSP(
+    //   `SELECT sp_register_vendor(
+    //     :name, :email, :password,
+    //     :vendor_name, :company_reg_no, :vendor_gst_no,
+    //     :vendor_contact_person_name, :vendor_phone,
+    //     :vendor_district, :vendor_state, :vendor_country,
+    //     :vendor_latitude, :vendor_longitude
+    //   )`,
+    //   {
+    //     name, email, password,
+    //     vendor_name, company_reg_no, vendor_gst_no,
+    //     vendor_contact_person_name, vendor_phone,
+    //     vendor_district, vendor_state, vendor_country,
+    //     vendor_latitude, vendor_longitude
+    //   }
+    // );
 
+    const result= await callSP(
+  `SELECT sp_register_vendor(
+    :name, :email, :password,
+    :vendor_name, :company_reg_no, :vendor_gst_no,
+    :contact_person, :vendor_phone,
+    :district, :state, :country,
+    :lat, :long
+  )`,
+  {
+    name, email, password,
+    vendor_name, company_reg_no, vendor_gst_no,
+    contact_person, vendor_phone,
+    district, state, country,
+    lat, long
+  }
+);
     const response = result[0].sp_register_vendor;
 
     if (!response.success) {
