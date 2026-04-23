@@ -9,7 +9,7 @@ exports.updateVendorSchema = Joi.object({
   vendor_district: Joi.string().optional(),
   vendor_state: Joi.string().optional(),
   vendor_country: Joi.string().optional(),
-vendor_status: Joi.string().valid('active','inactive','suspended').optional(),
+  vendor_status: Joi.string().valid('active', 'inactive', 'suspended').optional(),
   vendor_latitude: Joi.number().optional(),
   vendor_longitude: Joi.number().optional(),
 });

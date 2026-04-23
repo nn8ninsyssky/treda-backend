@@ -1,44 +1,39 @@
-exports.create = async (req, res, next) => {
+const { callSP } = require('../config/db.postgres');
+
+
+
+exports.updateMyAdmin = async (req, res, next) => {
   try {
-    res.status(201).json({
-      success: true,
-      message: 'Created successfully',
-      data: req.body,
-    });
+    const result = await callSP(
+      `SELECT sp_update_admin(:user_id, :data)`,
+      {
+        user_id: req.user.id,
+        data: JSON.stringify(req.body)
+      }
+    );
+
+    const response = result[0].sp_update_admin;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    res.json(response);
+
   } catch (err) {
     next(err);
   }
 };
 
-exports.getAll = async (req, res, next) => {
+exports.getMyAdmin = async (req, res, next) => {
   try {
-    res.json({
-      success: true,
-      message: 'Fetched all records',
-      data: [],
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+    const result = await callSP(
+      `SELECT sp_get_admin_by_user_id(:user_id)`,
+      { user_id: req.user.id }
+    );
 
-exports.getOne = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: `Fetched record ${req.params.id}`,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+    res.json(result[0].sp_get_admin_by_user_id);
 
-exports.update = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: `Updated record ${req.params.id}`,
-    });
   } catch (err) {
     next(err);
   }
@@ -46,10 +41,21 @@ exports.update = async (req, res, next) => {
 
 exports.delete = async (req, res, next) => {
   try {
-    res.json({
-      success: true,
-      message: `Deleted record ${req.params.id}`,
-    });
+    const { id } = req.params;
+
+    const result = await callSP(
+      `SELECT sp_delete_admin(:user_id)`,
+      { user_id: id }
+    );
+
+    const response = result[0].sp_delete_admin;
+
+    if (!response.success) {
+      return res.status(404).json(response);
+    }
+
+    res.json(response);
+
   } catch (err) {
     next(err);
   }

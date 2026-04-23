@@ -39,7 +39,7 @@ router.post(
 router.post(
   '/register/vendor',
 
-  allowRoles(ROLES.TREDA_OFFICER),
+  allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN,ROLES.VENDOR),
   validate(registerVendorSchema),
   controller.registerVendor
 );

@@ -11,13 +11,6 @@ const { updatecustomerSchema } = require('../validators/customer.validator');
 
 const { allowRoles,ROLES } = require('../middlewares/roleCheck');
 
-
-
-
-
-
-// router.get('/:id', authenticate, controller.getOne);
-
 router.get(
   '/me',
   authenticate,
