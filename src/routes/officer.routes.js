@@ -9,6 +9,8 @@ const authenticate = require('../middlewares/auth');
 const { allowRoles,ROLES } = require('../middlewares/roleCheck');
 const controller = require('../controllers/officer.controller');
 
+
+// Fetching Admin Profile
 router.get(
   "/me",
   authenticate,
@@ -16,7 +18,7 @@ router.get(
   controller.getMyAdmin
 );
 
-
+// Updating Admin Profile
 router.put(
   '/me',
   authenticate,
@@ -25,6 +27,7 @@ router.put(
   controller.updateMyAdmin
 );
 
+//Delete Admin Profile
 router.delete(
   '/:id',
   authenticate,
@@ -32,4 +35,19 @@ router.delete(
   controller.delete
 );
 
+// Update Vendor Profile By Admin
+router.get(
+  "/vendor/update",
+  authenticate,
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
+  controller.updateMyVendorByAdmin
+);
+
+// Fetch All Registered Vendors Details 
+router.get(
+  "/getallvendors",
+  authenticate,
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
+  controller.getAllVendors
+);
 module.exports = router;
