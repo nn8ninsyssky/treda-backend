@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const authenticate = require('../middlewares/auth');
 
 const controller = require('../controllers/auth.controller');
 const validate = require('../middlewares/validate');
@@ -30,16 +31,11 @@ router.post(
   controller.loginCustomer
 );
 // REGISTER Vendor
-// router.post(
-//   '/register/vendor',
-//   authenticate,
-//   validate(registerVendorSchema),
-//   controller.registerVendor
-// );
+
 router.post(
   '/register/vendor',
-
-  allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN,ROLES.VENDOR),
+authenticate,
+  allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN),
   validate(registerVendorSchema),
   controller.registerVendor
 );
