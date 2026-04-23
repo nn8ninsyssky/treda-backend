@@ -50,6 +50,7 @@ exports.getMyCustomer = async (req, res, next) => {
 };
 
 exports.updateMyCustomer = async (req, res, next) => {
+  console.log("BODY",req.body)
   try {
     const result = await callSP(
       `SELECT sp_update_customer(:user_id, :data)`,
