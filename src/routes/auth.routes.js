@@ -3,8 +3,7 @@ const router = express.Router();
 
 const controller = require('../controllers/auth.controller');
 const validate = require('../middlewares/validate');
-const { allowRoles,ROLES } = require('../middlewares/roleCheck');
-const authenticate = require('../middlewares/auth');
+const { allowRoles, ROLES } = require('../middlewares/roleCheck');
 
 const {
   registerCustomerSchema,
@@ -17,7 +16,7 @@ const {
 // REGISTER Customer
 router.post(
   '/register/customer',
-  authenticate,
+
   validate(registerCustomerSchema),
   controller.registerCustomer
 );
@@ -25,7 +24,7 @@ router.post(
 // LOGIN Customer
 router.post(
   '/login/customer',
-  authenticate,
+
   validate(loginCustomerSchema),
   controller.loginCustomer
 );
@@ -38,15 +37,16 @@ router.post(
 // );
 router.post(
   '/register/vendor',
-  authenticate,
+
   allowRoles(ROLES.TREDA_OFFICER),
+  validate(registerVendorSchema),
   controller.registerVendor
 );
 
 // LOGIN Vendor
 router.post(
-  '/login',
-  authenticate,
+  '/login/vendor',
+
   validate(loginVendorSchema),
   controller.loginVendor
 );
