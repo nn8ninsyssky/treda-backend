@@ -11,6 +11,8 @@ const {
   loginCustomerSchema,
   registerVendorSchema,
   loginVendorSchema,
+  registerTechnicianSchema,
+  loginTechnicianSchema,
   loginTredaOfficerSchema,
   refreshSchema
 } = require('../validators/auth.validator');
@@ -46,6 +48,23 @@ router.post(
 
   validate(loginVendorSchema),
   controller.loginVendor
+);
+
+// register Technician
+router.post(
+  '/register/technician',
+authenticate,
+  allowRoles(ROLES.VENDOR),
+  validate(registerTechnicianSchema),
+  controller.registerTechnician
+)
+
+// Login Technician
+router.post(
+  '/login/technician',
+
+  validate(loginTechnicianSchema),
+  controller.loginTechnician
 );
 
 // LOGIN Treda Officer

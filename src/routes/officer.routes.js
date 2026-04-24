@@ -53,7 +53,6 @@ router.get(
 
 // Fetch All Registered Customer Details
 
-
 router.get(
   "/getallcustomersforadmin",
   authenticate,

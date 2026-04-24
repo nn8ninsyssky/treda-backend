@@ -183,6 +183,103 @@ exports.loginVendor = async (req, res, next) => {
   }
 };
 
+// Technician Registration
+exports.registerTechnician = async (req, res, next) => {
+  try {
+
+    const {
+      vendor_id,
+
+      name,
+      email,
+      password,
+
+      phone,
+      village,
+      district,
+      state,
+      country,
+      pincode,
+
+      lat,
+      long,
+
+      specialization
+    } = req.body;
+
+    const result = await callSP(
+      `SELECT sp_register_technician(
+        :vendor_id,
+        :name, :email, :password,
+        :phone, :village, :district, :state, :country, :pincode,
+        :lat, :long,
+        :specialization
+      )`,
+      {
+        vendor_id,
+
+        name,
+        email,
+        password,
+
+        phone,
+        village,
+        district,
+        state,
+        country,
+        pincode,
+
+        lat,
+        long,
+
+        specialization
+      }
+    );
+
+    const response = result[0].sp_register_technician;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(201).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Technician Login
+exports.loginTechnician = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    const result = await callSP(
+      `SELECT sp_login_technician(:email, :password)`,
+      { email, password }
+    );
+
+    const response = result[0].sp_login_technician;
+
+    if (!response.success) {
+      return res.status(401).json(response);
+    }
+
+    const tokens = generateTokens({
+      id: response.user_id,
+      role: response.role,
+      name: response.name
+    });
+
+    res.json({
+      ...response,
+      ...tokens
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
 
 // Treda Admin Login
 exports.loginTredaAdmin = async (req, res, next) => {
