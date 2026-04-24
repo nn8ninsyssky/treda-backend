@@ -111,3 +111,25 @@ exports.getAllVendors = async (req, res, next) => {
     next(err);
   }
 };
+
+// Fetch All Customer Details for Admin
+
+exports.getAllCustomersForAdmin = async (req, res, next) => {
+  try {
+    // Get query params (with defaults)
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const result = await callSP(
+      `SELECT sp_get_all_customers_for_admin(:page, :limit)`,
+      { page, limit }
+    );
+
+    const response = result[0].sp_get_all_customers_for_admin;
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};

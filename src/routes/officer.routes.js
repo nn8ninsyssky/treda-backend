@@ -36,7 +36,7 @@ router.delete(
 );
 
 // Update Vendor Profile By Admin
-router.get(
+router.put(
   "/vendor/update",
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
@@ -50,4 +50,15 @@ router.get(
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
   controller.getAllVendors
 );
+
+// Fetch All Registered Customer Details
+
+
+router.put(
+  "/customer/update",
+  authenticate,
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
+  controller.getAllCustomersForAdmin
+);
+
 module.exports = router;
