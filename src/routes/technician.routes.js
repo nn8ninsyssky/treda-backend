@@ -4,18 +4,18 @@ const router = express.Router();
 const controller = require('../controllers/technician.controller');
 const authenticate = require('../middlewares/auth');
 
-const { allowRoles } = require('../middlewares/roleCheck');
+const { updateTechnicianSchema } = require('../validators/technician.validator');
 
-router.get('/', authenticate, controller.getAll);
-//router.post('/', authenticate, controller.create);
-router.post(
-  '/',
+const validate = require('../middlewares/validate');
+
+const { allowRoles,ROLES } = require('../middlewares/roleCheck');
+
+router.put(
+  '/me',
   authenticate,
-  allowRoles('vendor'),
-  controller.createTechnician
+  allowRoles(ROLES.VENDOR),
+  validate(updateTechnicianSchema),
+  controller.updateMyTechnician
 );
-router.get('/:id', authenticate, controller.getOne);
-router.put('/:id', authenticate, controller.update);
-router.delete('/:id', authenticate, controller.delete);
 
 module.exports = router;

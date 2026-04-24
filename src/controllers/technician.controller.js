@@ -1,79 +1,23 @@
-const { User } = require('../models/pg');
-const bcrypt = require('bcrypt');
+const { callSP } = require('../config/db.postgres');
 
-exports.createTechnician = async (req, res, next) => {
+exports.updateMyTechnician = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const result = await callSP(
+      `SELECT sp_update_technician(:user_id, :data)`,
+      {
+        user_id: req.user.id,
+        data: JSON.stringify(req.body)
+      }
+    );
 
-    const existing = await User.findOne({ where: { email } });
+    const response = result[0].sp_update_technician;
 
-    if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: 'Technician already exists',
-      });
+    if (!response.success) {
+      return res.status(400).json(response);
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    res.json(response);
 
-    const tech = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-      role: 'technician',
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Technician created by vendor',
-      data: tech,
-    });
-
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.getAll = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: 'Fetched all records',
-      data: [],
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.getOne = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: `Fetched record ${req.params.id}`,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.update = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: `Updated record ${req.params.id}`,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-exports.delete = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: `Deleted record ${req.params.id}`,
-    });
   } catch (err) {
     next(err);
   }
