@@ -1,55 +1,23 @@
-exports.create = async (req, res, next) => {
-  try {
-    res.status(201).json({
-      success: true,
-      message: 'Created successfully',
-      data: req.body,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+const { callSP } = require('../config/db.postgres');
 
-exports.getAll = async (req, res, next) => {
+exports.registerDevice = async (req, res, next) => {
   try {
-    res.json({
-      success: true,
-      message: 'Fetched all records',
-      data: [],
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+    const result = await callSP(
+      `SELECT sp_register_device(:user_id, :data)`,
+      {
+        user_id: req.user.id, // ✅ from JWT
+        data: JSON.stringify(req.body)
+      }
+    );
 
-exports.getOne = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: `Fetched record ${req.params.id}`,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+    const response = result[0].sp_register_device;
 
-exports.update = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: `Updated record ${req.params.id}`,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
 
-exports.delete = async (req, res, next) => {
-  try {
-    res.json({
-      success: true,
-      message: `Deleted record ${req.params.id}`,
-    });
+    return res.status(201).json(response);
+
   } catch (err) {
     next(err);
   }

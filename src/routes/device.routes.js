@@ -3,11 +3,13 @@ const router = express.Router();
 
 const controller = require('../controllers/device.controller');
 const authenticate = require('../middlewares/auth');
+const { allowRoles, ROLES } = require('../middlewares/roleCheck');
 
-router.get('/', authenticate, controller.getAll);
-router.post('/', authenticate, controller.create);
-router.get('/:id', authenticate, controller.getOne);
-router.put('/:id', authenticate, controller.update);
-router.delete('/:id', authenticate, controller.delete);
+router.post(
+  '/vendor/device/register',
+  authenticate,
+  allowRoles(ROLES.VENDOR), 
+  controller.registerDevice
+);
 
 module.exports = router;
