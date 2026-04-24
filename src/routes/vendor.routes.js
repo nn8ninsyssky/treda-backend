@@ -32,4 +32,13 @@ router.delete(
   controller.delete
 );
 
+
+// for technician update by vendor
+router.put(
+  "/technician/:user_id",
+  authenticate,
+  allowRoles(ROLES.VENDOR),
+  controller.updateMyTechnicianByAdmin
+);
+
 module.exports = router;

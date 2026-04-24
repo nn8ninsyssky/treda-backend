@@ -13,7 +13,7 @@ const { allowRoles,ROLES } = require('../middlewares/roleCheck');
 router.put(
   '/me',
   authenticate,
-  allowRoles(ROLES.VENDOR),
+  allowRoles(ROLES.TECHNICIAN),
   validate(updateTechnicianSchema),
   controller.updateMyTechnician
 );
