@@ -1,6 +1,7 @@
 const Joi = require('joi');
 
 exports.updateTechnicianSchema = Joi.object({
+  vendor_id: Joi.string().uuid().optional(), 
   technician_name: Joi.string().optional(),
   technician_phone: Joi.string().optional(),
   technician_village:Joi.string().optional(),
