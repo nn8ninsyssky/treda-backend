@@ -37,7 +37,7 @@ router.delete(
 
 // Update Vendor Profile By Admin
 router.put(
-  "/vendor/update",
+  "/vendor/:user_id",
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
   controller.updateMyVendorByAdmin
@@ -54,8 +54,8 @@ router.get(
 // Fetch All Registered Customer Details
 
 
-router.put(
-  "/customer/update",
+router.get(
+  "/getallcustomersforadmin",
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
   controller.getAllCustomersForAdmin

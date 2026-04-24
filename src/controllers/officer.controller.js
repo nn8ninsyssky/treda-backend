@@ -69,7 +69,7 @@ exports.updateMyVendorByAdmin = async (req, res, next) => {
     const result = await callSP(
       `SELECT sp_update_vendor_by_admin(:user_id, :data)`,
       {
-        user_id: req.user.id,
+        user_id: req.params.user_id, // ✅ FIX
         data: JSON.stringify(req.body)
       }
     );
