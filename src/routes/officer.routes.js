@@ -56,7 +56,7 @@ router.get(
 router.get(
   "/getallcustomersforadmin",
   authenticate,
-  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER,ROLES.VENDOR),
   controller.getAllCustomersForAdmin
 );
 

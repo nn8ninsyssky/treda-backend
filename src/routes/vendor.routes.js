@@ -41,7 +41,7 @@ router.put(
   controller.updateMyTechnicianByAdmin
 );
 
-//for technician fetch by vendor
+//for all technician fetch by vendor
 router.get("/technicians",
   authenticate,
   allowRoles(ROLES.VENDOR,ROLES.ADMIN,ROLES.TREDA_OFFICER),
