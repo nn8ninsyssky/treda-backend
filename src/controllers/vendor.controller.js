@@ -38,7 +38,27 @@ exports.getMyVendor = async (req, res, next) => {
     next(err);
   }
 };
+exports.delete = async (req, res, next) => {
+  try {
+    const { id } = req.params;
 
+    const result = await callSP(
+      `SELECT sp_delete_vendor(:user_id)`,
+      { user_id: id }
+    );
+
+    const response = result[0].sp_delete_vendor;
+
+    if (!response.success) {
+      return res.status(404).json(response);
+    }
+
+    res.json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
 
 // For Technician Update by Vendor
 
@@ -66,22 +86,23 @@ exports.updateMyTechnicianByAdmin = async (req, res, next) => {
 };
 
 
-exports.delete = async (req, res, next) => {
+// For getting all Technicians Data
+
+exports.getMyTechnicians = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { page = 1, limit = 10, search = null } = req.query;
 
     const result = await callSP(
-      `SELECT sp_delete_vendor(:user_id)`,
-      { user_id: id }
+      `SELECT sp_get_technicians_by_vendor(:user_id, :page, :limit, :search)`,
+      {
+        user_id: req.user.id,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        search
+      }
     );
 
-    const response = result[0].sp_delete_vendor;
-
-    if (!response.success) {
-      return res.status(404).json(response);
-    }
-
-    res.json(response);
+    res.json(result[0].sp_get_technicians_by_vendor);
 
   } catch (err) {
     next(err);

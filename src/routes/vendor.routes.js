@@ -41,4 +41,11 @@ router.put(
   controller.updateMyTechnicianByAdmin
 );
 
+//for technician fetch by vendor
+router.get("/technicians",
+  authenticate,
+  allowRoles(ROLES.VENDOR,ROLES.ADMIN,ROLES.TREDA_OFFICER),
+  controller.getMyTechnicians
+)
+
 module.exports = router;
