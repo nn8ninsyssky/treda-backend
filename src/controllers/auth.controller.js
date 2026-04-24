@@ -223,11 +223,13 @@ exports.loginTechnician = async (req, res, next) => {
       return res.status(401).json(response);
     }
 
-    const tokens = generateTokens({
-      id: response.user_id,
-      role: response.role,
-      name: response.name
-    });
+    const userData = response.data;
+
+const tokens = generateTokens({
+  id: userData.user_id,
+  role: userData.role,
+  name: userData.name
+});
 
     res.json({
       ...response,

@@ -19,28 +19,20 @@ const ROLES = {
  */
 const allowRoles = (...roles) => {
   return (req, res, next) => {
-
-    if (!req.user || !req.user.role) {
+    if (!req.user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid user (role missing in token)',
+        message: 'Not authenticated.',
       });
     }
 
-    const userRole = req.user.role.toLowerCase();
-
-    const allowedRoles = roles
-      .filter(Boolean)
-      .map(r => r.toLowerCase());
-
-    if (!allowedRoles.includes(userRole)) {
-      logger.warn(
-        `Forbidden: user ${req.user.id} with role '${req.user.role}' tried ${req.method} ${req.originalUrl}`
-      );
-
+if (!roles.map(r => r.toLowerCase()).includes(req.user.role.toLowerCase())) {
+        logger.warn(
+  `Forbidden: user ${req.user.id} with role '${req.user.role}' tried ${req.method} ${req.originalUrl}`
+);
       return res.status(403).json({
         success: false,
-        message: 'Access denied.',
+        message: 'Access denied. You do not have permission for this action.',
       });
     }
 
