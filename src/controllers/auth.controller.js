@@ -225,9 +225,9 @@ exports.loginTechnician = async (req, res, next) => {
 console.log("response technician",response);
 logger.push("technician response",response.data)
     const tokens = generateTokens({
-      id: response.user_id,
-      role: response.role,
-      name: response.name
+      id: response.user.id,
+      role: response.user.role,
+      name: response.user.name
     });
 
     res.json({
