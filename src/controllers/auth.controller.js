@@ -222,14 +222,13 @@ exports.loginTechnician = async (req, res, next) => {
     if (!response.success) {
       return res.status(401).json(response);
     }
-
-    const userData = response.data;
-
-const tokens = generateTokens({
-  id: userData.user_id,
-  role: userData.role,
-  name: userData.name
-});
+console.log("response technician",response);
+logger.push("technician response",response.data)
+    const tokens = generateTokens({
+      id: response.user_id,
+      role: response.role,
+      name: response.name
+    });
 
     res.json({
       ...response,
