@@ -70,7 +70,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(helmet({
   crossOriginResourcePolicy: false,
 }));
-app.use(generalLimiter);
 
 
 // ── Health check ──────────────────────────────────────
@@ -79,8 +78,12 @@ app.get('/health', (req, res) => {
 });
 
 // ── API routes ────────────────────────────────────────
-app.use('/api/auth',        authLimiter, authRoutes);
-//app.use('/api/auth', authRoutes);
+//app.use('/api/auth',        authLimiter, authRoutes);
+
+//app.use(generalLimiter);
+// apply general limiter AFTER auth
+app.use('/api/auth', authRoutes);
+
 app.use('/api/vendors',     vendorRoutes);
 app.use('/api/customers',   customerRoutes);
 app.use('/api/devices',     deviceRoutes);
