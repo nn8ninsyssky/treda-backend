@@ -186,57 +186,15 @@ exports.loginVendor = async (req, res, next) => {
 // Technician Registration
 exports.registerTechnician = async (req, res, next) => {
   try {
-
-    const {
-      vendor_id,
-
-      name,
-      email,
-      password,
-
-      phone,
-      village,
-      district,
-      state,
-      country,
-      pincode,
-
-      lat,
-      long,
-
-      specialization
-    } = req.body;
-
     const result = await callSP(
-      `SELECT sp_register_technician(
-        :vendor_id,
-        :name, :email, :password,
-        :phone, :village, :district, :state, :country, :pincode,
-        :lat, :long,
-        :specialization
-      )`,
+      `SELECT sp_register_technician_by_vendor(:user_id, :data)`,
       {
-        vendor_id,
-
-        name,
-        email,
-        password,
-
-        phone,
-        village,
-        district,
-        state,
-        country,
-        pincode,
-
-        lat,
-        long,
-
-        specialization
+        user_id: req.user.id, // ✅ from JWT
+        data: JSON.stringify(req.body) // ✅ full payload
       }
     );
 
-    const response = result[0].sp_register_technician;
+    const response = result[0].sp_register_technician_by_vendor;
 
     if (!response.success) {
       return res.status(400).json(response);
