@@ -87,15 +87,15 @@ exports.updateMyVendorByAdmin = async (req, res, next) => {
   }
 };
 
-// Fetch All Vendor Details
+// Fetch All Vendor Details for Admin
 exports.getAllVendors = async (req, res, next) => {
   try {
 
     const result = await callSP(
-      `SELECT sp_get_all_vendors()`
+      `SELECT sp_get_all_vendors_for_admin()`
     );
 
-    const response = result[0].sp_get_all_vendors;
+    const response = result[0].sp_get_all_vendors_for_admin;
 
     // Handle unexpected null
     if (!response) {
