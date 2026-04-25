@@ -48,4 +48,12 @@ router.get("/technicians",
   controller.getMyTechnicians
 )
 
+// For getting all devices under logged in vendor
+
+router.get(
+  '/getalldevicesforvendor',
+  authenticate,
+  allowRoles(ROLES.VENDOR),
+  controller.getAllDevicesForVendor
+);
 module.exports = router;

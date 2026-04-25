@@ -108,3 +108,29 @@ exports.getMyTechnicians = async (req, res, next) => {
     next(err);
   }
 };
+
+// For getting all devices under logged in vendor
+exports.getAllDevicesForVendor = async (req, res, next) => {
+  try {
+    const result = await callSP(
+      `SELECT sp_get_devices_by_vendor(:user_id)`,
+      {
+        user_id: req.user.id
+      }
+    );
+
+    const response = result?.[0]?.sp_get_devices_by_vendor;
+
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch devices"
+      });
+    }
+
+    res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
