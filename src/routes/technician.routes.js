@@ -26,4 +26,12 @@ router.put(
   controller.updateMyTechnician
 );
 
+
+// Fetch All Registered Vendors Details 
+router.get(
+  "/getallvendors",
+  authenticate,
+  allowRoles(ROLES.TECHNICIAN),
+  controller.getAllVendors
+);
 module.exports = router;

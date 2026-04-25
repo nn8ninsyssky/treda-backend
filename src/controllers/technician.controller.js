@@ -36,3 +36,28 @@ exports.getMyTechnician = async (req, res, next) => {
     next(err);
   }
 };
+
+// Fetch All Vendor Details for technician
+exports.getAllVendors = async (req, res, next) => {
+  try {
+
+    const result = await callSP(
+      `SELECT sp_get_all_vendors_for_admin()`
+    );
+
+    const response = result[0].sp_get_all_vendors_for_admin;
+
+    // Handle unexpected null
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch vendors"
+      });
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
