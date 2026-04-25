@@ -67,4 +67,12 @@ router.get(
   controller.getAllCustomersForAdmin
 );
 
+
+// Fetch all Deices for Admin
+router.get(
+  "/getalldevicesforadmin",
+  authenticate,
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER,ROLES.VENDOR),
+  controller.getAllDevicesforAdmin
+);
 module.exports = router;

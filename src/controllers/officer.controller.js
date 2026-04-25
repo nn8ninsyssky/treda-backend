@@ -172,3 +172,35 @@ exports.getAllTechnicians = async (req, res, next) => {
     next(err);
   }
 };
+
+//Fetch all devices for Admin
+exports.getAllDevicesforAdmin = async (req, res, next) => {
+  try {
+    const {
+      page = 1,
+      limit = 10
+    } = req.query;
+
+    const result = await callSP(
+      `SELECT sp_get_all_devices_for_admin(:page, :limit)`,
+      {
+        page: parseInt(page),
+        limit: parseInt(limit)
+      }
+    );
+
+    const response = result?.[0]?.sp_get_all_devices_for_admin;
+
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch devices"
+      });
+    }
+
+    res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
