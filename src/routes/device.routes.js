@@ -8,7 +8,7 @@ const { allowRoles, ROLES } = require('../middlewares/roleCheck');
 router.post(
   '/vendor/device/register',
   authenticate,
-  allowRoles(ROLES.VENDOR), 
+  allowRoles(ROLES.VENDOR,ROLES.TECHNICIAN), 
   controller.registerDevice
 );
 
