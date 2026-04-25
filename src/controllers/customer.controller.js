@@ -72,3 +72,29 @@ exports.getMyDevices = async (req, res, next) => {
     next(err);
   }
 };
+
+//Fecth all vendors from which customer had taken devices
+exports.getMyVendorsForCustomer = async (req, res, next) => {
+  try {
+    const result = await callSP(
+      `SELECT sp_get_vendors_by_customer(:user_id)`,
+      {
+        user_id: req.user.id
+      }
+    );
+
+    const response = result?.[0]?.sp_get_vendors_by_customer;
+
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch vendors"
+      });
+    }
+
+    res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};

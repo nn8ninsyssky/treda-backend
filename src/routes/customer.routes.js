@@ -40,4 +40,12 @@ router.get(
   allowRoles(ROLES.CUSTOMER),
   controller.getMyDevices
 );
+
+//Fecth all vendors from which customer had taken devices
+router.get(
+  '/getallvendorsforcustomer',
+  authenticate,
+  allowRoles(ROLES.CUSTOMER),
+  controller.getMyVendorsForCustomer
+);
 module.exports = router;
