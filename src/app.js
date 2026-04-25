@@ -6,7 +6,7 @@ const cors      = require('cors');
 const rateLimit = require('express-rate-limit');
 
 const { connectPostgres, sequelize } = require('./config/db.postgres');
-const connectMongo    = require('./config/db.mongo');
+const {connectMongo}    = require('./config/db.mongo');
 const errorHandler    = require('./middlewares/errorHandler');
 const logger          = require('./utils/logger');
 

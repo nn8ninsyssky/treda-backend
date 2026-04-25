@@ -18,3 +18,4 @@
 [2026-04-18 18:53:31] ERROR: Failed to start server: cannot cast type vendor_status_enum to enum_vendors_vendor_status
 [2026-04-18 18:59:08] ERROR: Failed to start server: there is no unique constraint matching given keys for referenced table "treda_officers"
 [2026-04-20 13:08:26] ERROR: Failed to start server: cannot drop column id of table customers because other objects depend on it
+[2026-04-25 20:08:47] ERROR: Failed to start server: connectMongo is not a function
