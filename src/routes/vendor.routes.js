@@ -44,7 +44,7 @@ router.put(
 //for all technician fetch by vendor
 router.get("/technicians",
   authenticate,
-  allowRoles(ROLES.VENDOR,ROLES.ADMIN,ROLES.TREDA_OFFICER),
+  allowRoles(ROLES.VENDOR),
   controller.getMyTechnicians
 )
 

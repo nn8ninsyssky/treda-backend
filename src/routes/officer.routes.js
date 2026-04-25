@@ -51,6 +51,13 @@ router.get(
   controller.getAllVendors
 );
 
+// Fetch al Technicians for admin
+router.get("/technicians",
+  authenticate,
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
+  controller.getAllTechnicians
+)
+
 // Fetch All Registered Customer Details
 
 router.get(

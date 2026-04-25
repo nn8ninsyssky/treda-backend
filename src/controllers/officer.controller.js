@@ -133,3 +133,42 @@ exports.getAllCustomersForAdmin = async (req, res, next) => {
     next(err);
   }
 };
+
+// Fetch all Technicians for Admin
+exports.getAllTechnicians = async (req, res, next) => {
+  try {
+
+    const {
+      page = 1,
+      limit = 10,
+      search = null
+    } = req.query;
+
+    const result = await callSP(
+      `SELECT sp_get_all_technicians_for_admin(
+        :page,
+        :limit,
+        :search
+      )`,
+      {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        search
+      }
+    );
+
+    const response = result?.[0]?.sp_get_all_technicians_for_admin;
+
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch technicians"
+      });
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
