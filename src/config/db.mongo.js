@@ -22,12 +22,25 @@ let db;
 const connectMongo = async () => {
   await mongoose.connect(process.env.MONGO_URI);
 
-  db = mongoose.connection.db; //  native DB instance
+  return new Promise((resolve, reject) => {
+    mongoose.connection.once('open', () => {
+      db = mongoose.connection.db;
+      console.log('✅ MongoDB connected');
+      resolve();
+    });
+
+    mongoose.connection.on('error', (err) => {
+      reject(err);
+    });
+  });
 };
 
-const getDb = () => db;
-
-
+const getDb = () => {
+  if (!db) {
+    throw new Error('MongoDB not initialized');
+  }
+  return db;
+};
 // ── Connection event listeners ────────────────────────
 mongoose.connection.on('disconnected', () => {
   logger.warn('MongoDB disconnected — attempting reconnect...');
