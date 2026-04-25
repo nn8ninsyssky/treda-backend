@@ -56,4 +56,12 @@ router.get(
   allowRoles(ROLES.VENDOR),
   controller.getAllDevicesForVendor
 );
+
+// Update devices details by vendor
+router.put(
+  '/devices/:device_id',
+  authenticate,
+  allowRoles(ROLES.VENDOR),
+  controller.updateDeviceByVendor
+);
 module.exports = router;

@@ -134,3 +134,37 @@ exports.getAllDevicesForVendor = async (req, res, next) => {
     next(err);
   }
 };
+
+// Update devices details by vendor
+exports.updateDeviceByVendor = async (req, res, next) => {
+  try {
+    const { device_id } = req.params;
+
+    const result = await callSP(
+      `SELECT sp_update_device_by_vendor(:user_id, :device_id, :data)`,
+      {
+        user_id: req.user.id,
+        device_id,
+        data: req.body
+      }
+    );
+
+    const response = result?.[0]?.sp_update_device_by_vendor;
+
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update device"
+      });
+    }
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
