@@ -46,3 +46,29 @@ exports.delete = async (req, res, next) => {
     next(err);
   }
 };
+
+//Fetch all devices for customer
+exports.getMyDevices = async (req, res, next) => {
+  try {
+    const result = await callSP(
+      `SELECT sp_get_devices_by_customer(:user_id)`,
+      {
+        user_id: req.user.id
+      }
+    );
+
+    const response = result?.[0]?.sp_get_devices_by_customer;
+
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch devices"
+      });
+    }
+
+    res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};

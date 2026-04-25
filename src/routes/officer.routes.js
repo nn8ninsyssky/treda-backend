@@ -63,7 +63,7 @@ router.get("/technicians",
 router.get(
   "/getallcustomersforadmin",
   authenticate,
-  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER,ROLES.VENDOR),
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
   controller.getAllCustomersForAdmin
 );
 
@@ -72,7 +72,7 @@ router.get(
 router.get(
   "/getalldevicesforadmin",
   authenticate,
-  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER,ROLES.VENDOR),
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
   controller.getAllDevicesforAdmin
 );
 module.exports = router;

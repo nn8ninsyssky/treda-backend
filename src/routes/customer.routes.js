@@ -32,4 +32,12 @@ router.delete(
   allowRoles(ROLES.ADMIN, ROLES.TREDA_OFFICER),
   controller.delete
 );
+
+//Fecth all devices for customer
+router.get(
+  '/devicesforcustomer',
+  authenticate,
+  allowRoles(ROLES.CUSTOMER),
+  controller.getMyDevices
+);
 module.exports = router;
