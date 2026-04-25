@@ -22,17 +22,10 @@ let db;
 const connectMongo = async () => {
   await mongoose.connect(process.env.MONGO_URI);
 
-  return new Promise((resolve, reject) => {
-    mongoose.connection.once('open', () => {
-      db = mongoose.connection.db;
-      console.log('✅ MongoDB connected');
-      resolve();
-    });
+  // ✅ Immediately assign db
+  db = mongoose.connection.db;
 
-    mongoose.connection.on('error', (err) => {
-      reject(err);
-    });
-  });
+  console.log('✅ MongoDB connected');
 };
 
 const getDb = () => {
@@ -45,7 +38,9 @@ const getDb = () => {
 mongoose.connection.on('disconnected', () => {
   logger.warn('MongoDB disconnected — attempting reconnect...');
 });
-
+mongoose.connection.on('connected', () => {
+  console.log('Mongo connected event');
+});
 mongoose.connection.on('reconnected', () => {
   logger.info('MongoDB reconnected');
 });
