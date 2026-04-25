@@ -12,4 +12,9 @@ router.post(
   controller.registerDevice
 );
 
+// Fetch device, vendor, customer details for complaint raisers
+router.get(
+  "/device/:device_qr_id",
+  controller.getDeviceFullDetails
+);
 module.exports = router;

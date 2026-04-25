@@ -145,7 +145,7 @@ exports.updateDeviceByVendor = async (req, res, next) => {
       {
         user_id: req.user.id,
         device_id,
-        data: req.body
+       data: JSON.stringify(req.body) 
       }
     );
 
