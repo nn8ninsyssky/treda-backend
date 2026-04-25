@@ -9,4 +9,10 @@ router.post(
 //   optionalAuthenticate, // important (not strict auth)
   controller.registerComplaint
 );
+
+router.get(
+  "/complaints/device/:device_qr_id",
+  //authenticate,
+  controller.getComplaintByDeviceQR
+);
 module.exports = router;
