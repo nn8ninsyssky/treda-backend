@@ -10,6 +10,7 @@ exports.registerComplaint = async (req, res, next) => {
       vendor_id,
       complaint_type,
       complaint_priority,
+      complaint_status,
       complaint_description,
       complaint_resolution_notes,
       complaint_visit_notes
@@ -22,14 +23,16 @@ exports.registerComplaint = async (req, res, next) => {
         :device_qr_id,
         :vendor_id,
         :complaint_type,
-        :complaint_priority
+        :complaint_priority,
+        :complaint_status
       )`,
       {
         user_id: req.user ? req.user.id : null,
         device_qr_id,
         vendor_id,
         complaint_type,
-        complaint_priority
+        complaint_priority,
+        complaint_status   
       }
     );
 
