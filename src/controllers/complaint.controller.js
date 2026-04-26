@@ -1,118 +1,7 @@
 const { callSP } = require('../config/db.postgres');
 const retryMongoInsert = require('../utils/retryMongo');
 
-// exports.registerComplaint = async (req, res, next) => {
-//   try {
-//     const {
-//       device_qr_id,
-//       vendor_id,
-//       complaint_type,
-//       complaint_priority
-//     } = req.body;
-
-//     const result = await callSP(
-//       `SELECT sp_register_complaint(
-//         :user_id,
-//         :device_qr_id,
-//         :vendor_id,
-//         :complaint_type,
-//         :complaint_priority
-//       )`,
-//       {
-//         user_id: req.user ? req.user.id : null, // ✅ guest supported
-//         device_qr_id,
-//         vendor_id,
-//         complaint_type,
-//         complaint_priority
-//       }
-//     );
-
-//     const response = result?.[0]?.sp_register_complaint;
-
-//     if (!response.success) {
-//       return res.status(400).json(response);
-//     }
-
-//     res.status(201).json(response);
-
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-
 const { getDb } = require('../config/db.mongo');
-
-// exports.registerComplaint = async (req, res, next) => {
-//   try {
-//     const {
-//       device_qr_id,
-//       vendor_id,
-//       complaint_type,
-//       complaint_priority,
-//       complaint_description,
-//       complaint_resolution_notes,
-//       complaint_visit_notes
-//     } = req.body;
-
-//     // 1. Insert into PostgreSQL
-//     const result = await callSP(
-//       `SELECT sp_register_complaint(
-//         :user_id,
-//         :device_qr_id,
-//         :vendor_id,
-//         :complaint_type,
-//         :complaint_priority
-//       )`,
-//       {
-//         user_id: req.user ? req.user.id : null,
-//         device_qr_id,
-//         vendor_id,
-//         complaint_type,
-//         complaint_priority
-//       }
-//     );
-
-//     const response = result?.[0]?.sp_register_complaint;
-
-//     if (!response.success) {
-//       return res.status(400).json(response);
-//     }
-
-//     // 2. Insert into MongoDB (NO MODEL ✅)
-//    let db;
-
-// try {
-//   db = getDb();
-// } catch (err) {
-//   console.error(err.message);
-// }
-
-   
-
-// if (!db) {
-//   console.error("MongoDB not initialized");
-// } else {
-//    try {
-//   await db.collection('complaint').insertOne({
-//     complaint_id: response.complaint_id,
-//     complaint_description: complaint_description || "",
-//     complaint_resolution_notes: complaint_resolution_notes || "",
-//     complaint_visit_notes: complaint_visit_notes || "",
-//     created_at: new Date()
-//   });
-// } catch (mongoErr) {
-//   console.error("Mongo insert failed:", mongoErr.message);
-//   // DO NOT fail request
-// }
-// }
-
-//     res.status(201).json(response);
-
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 
 exports.registerComplaint = async (req, res, next) => {
   try {
@@ -155,7 +44,7 @@ exports.registerComplaint = async (req, res, next) => {
       const db = getDb();
 
       await retryMongoInsert(async () => {
-        return db.collection('complaints').insertOne({
+        return db.collection('complaint').insertOne({
           complaint_id: response.complaint_id,
           complaint_description: complaint_description || "",
           complaint_resolution_notes: complaint_resolution_notes || "",
