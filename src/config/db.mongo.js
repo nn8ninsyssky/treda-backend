@@ -1,31 +1,15 @@
 const mongoose = require('mongoose');
 const logger   = require('../utils/logger');
-
-// const connectMongo = async () => {
-//   try {
-//     await mongoose.connect(process.env.MONGO_URI, {
-//       serverSelectionTimeoutMS: 5000,  // fail fast if Mongo unreachable
-//       socketTimeoutMS:          45000,
-//       maxPoolSize:              10,
-//       minPoolSize:              2,
-//     });
-//     logger.info('MongoDB connected successfully');
-//   } catch (err) {
-//     logger.error('MongoDB connection failed:', err.message);
-//     throw err; // bubble up to app.js — server will not start
-//   }
-// };
-
-
 let db;
 
 const connectMongo = async () => {
   await mongoose.connect(process.env.MONGO_URI);
 
   // ✅ Immediately assign db
-  db = mongoose.connection.db;
-
+ // db = mongoose.connection.db;
+db = mongoose.connection.client.db("treda_mongo");
   console.log('✅ MongoDB connected');
+  console.log("Connected DB:", db.databaseName);
 };
 
 const getDb = () => {
