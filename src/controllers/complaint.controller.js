@@ -1,7 +1,12 @@
 const { callSP } = require('../config/db.postgres');
 const retryMongoInsert = require('../utils/retryMongo');
 
+
 const { getDb } = require('../config/db.mongo');
+
+
+const { getDb } = require('../config/db.mongo');
+
 
 exports.registerComplaint = async (req, res, next) => {
   try {
@@ -11,7 +16,8 @@ exports.registerComplaint = async (req, res, next) => {
       complaint_type,
       complaint_priority,
       complaint_status,
-      complaint_description,
+
+      complaint_description,      
       complaint_resolution_notes,
       complaint_visit_notes
     } = req.body;
@@ -33,6 +39,7 @@ exports.registerComplaint = async (req, res, next) => {
         complaint_type,
         complaint_priority,
         complaint_status   
+
       }
     );
 
