@@ -61,3 +61,27 @@ exports.getAllVendors = async (req, res, next) => {
     next(err);
   }
 };
+
+// to check whether a device is registered or not
+
+exports.checkDeviceRegistered = async (req, res, next) => {
+  try {
+    const { device_qr_id } = req.body;
+
+    const result = await callSP(
+      `SELECT sp_check_device_registered(:device_qr_id)`,
+      { device_qr_id }
+    );
+
+    const response = result?.[0]?.sp_check_device_registered;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};

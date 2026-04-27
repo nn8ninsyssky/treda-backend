@@ -34,4 +34,13 @@ router.get(
   allowRoles(ROLES.TECHNICIAN),
   controller.getAllVendors
 );
+
+
+// to check whether a device is registered or not
+router.post(
+  '/check-device',
+  authenticate,
+  allowRoles( ROLES.TECHNICIAN),
+  controller.checkDeviceRegistered
+);
 module.exports = router;
