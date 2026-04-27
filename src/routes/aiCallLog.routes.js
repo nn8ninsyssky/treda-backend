@@ -6,7 +6,7 @@ const authenticate = require('../middlewares/auth');
 
 // ➜ Insert AI Call Log
 router.post(
-  '/insert',
+  '/c',
   //allowRoles(ROLES.TREDA_OFFICER, ROLES.VENDOR, ROLES.TECHNICIAN),
   controller.insertAiCallLog
 );

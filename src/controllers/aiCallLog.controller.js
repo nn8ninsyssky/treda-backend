@@ -19,7 +19,8 @@ exports.insertAiCallLog = async (req, res, next) => {
     const result = await callSP(
       `SELECT sp_insert_ai_call_log(:data)`,
       {
-        data: {
+        data: JSON.stringify(
+          {
           customer_id: customer_id || null,
           complaint_id: complaint_id || null,
           duration,
@@ -27,6 +28,7 @@ exports.insertAiCallLog = async (req, res, next) => {
           purpose,
           status
         }
+        )
       }
     );
 
