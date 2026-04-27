@@ -110,3 +110,34 @@ exports.getComplaintByDeviceQR = async (req, res, next) => {
     next(err);
   }
 };
+
+//update complaint status by vendor or technician
+exports.updateComplaintStatus = async (req, res, next) => {
+  try {
+    const { complaint_id, complaint_status } = req.body;
+
+    const result = await callSP(
+      `SELECT sp_update_complaint_status(
+        :user_id,
+        :complaint_id,
+        :complaint_status
+      )`,
+      {
+        user_id: req.user.id,
+        complaint_id,
+        complaint_status
+      }
+    );
+
+    const response = result?.[0]?.sp_update_complaint_status;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
