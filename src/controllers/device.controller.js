@@ -5,7 +5,7 @@ exports.registerDevice = async (req, res, next) => {
     const result = await callSP(
       `SELECT sp_register_device(:user_id, :data)`,
       {
-        user_id: req.user.id, // ✅ from JWT
+        user_id: req.user.id, 
         data: JSON.stringify(req.body)
       }
     );
