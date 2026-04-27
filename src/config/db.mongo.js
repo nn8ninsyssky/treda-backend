@@ -5,10 +5,10 @@ let db;
 const connectMongo = async () => {
   await mongoose.connect(process.env.MONGO_URI);
 
-  // ✅ Immediately assign db
+  //  Immediately assign db
  // db = mongoose.connection.db;
 db = mongoose.connection.client.db("treda_mongo");
-  console.log('✅ MongoDB connected');
+  console.log('MongoDB connected');
   console.log("Connected DB:", db.databaseName);
 };
 
