@@ -5,7 +5,6 @@ const retryMongoInsert = require('../utils/retryMongo');
 const { getDb } = require('../config/db.mongo');
 
 
-const { getDb } = require('../config/db.mongo');
 
 
 exports.registerComplaint = async (req, res, next) => {
