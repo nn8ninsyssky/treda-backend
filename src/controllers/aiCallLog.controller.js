@@ -63,4 +63,35 @@ exports.insertAiCallLog = async (req, res, next) => {
   }
 };
 
+// update ai call log details
+exports.updateAiCallLog = async (req, res, next) => {
+  try {
+    const { call_id, ...data } = req.body;
 
+    if (!call_id) {
+      return res.status(400).json({
+        success: false,
+        message: "call_id is required"
+      });
+    }
+
+    const result = await callSP(
+      `SELECT sp_update_ai_call_log(:call_id, :data)`,
+      {
+        call_id,
+        data: JSON.stringify(data)
+      }
+    );
+
+    const response = result?.[0]?.sp_update_ai_call_log;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};

@@ -11,3 +11,9 @@ router.post(
   controller.insertAiCallLog
 );
 module.exports = router;
+
+// update ai call log details
+router.put(
+  '/update',
+  controller.updateAiCallLog
+);
