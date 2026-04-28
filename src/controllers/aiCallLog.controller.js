@@ -104,7 +104,7 @@ exports.updateAiCallLog = async (req, res, next) => {
         const update_call_log = await db.collection('ai_call_logs').updateOne(
           { call_id: String(call_id) },
           { $set: updateData },
-          { upsert: false } // optional
+          { upsert: true } // optional
         );
         console.log("Mongo update result:", update_call_log);
 
