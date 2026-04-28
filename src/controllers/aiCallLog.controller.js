@@ -92,11 +92,14 @@ exports.updateAiCallLog = async (req, res, next) => {
 try{
     const db = getDb();
 await db.collection('complaint').updateOne(
-      { call_id: String(call_id) },
-      {
-        $set: { ai_call_conversation }
-      }
-    );
+  { call_id: call_id_from_pg },
+  {
+    $set: {
+      ai_call_conversation: ai_call_conversation
+    }
+  },
+  { upsert: true }
+);
 }catch(mongoErr){
       console.error("Mongo insert failed after retries:", mongoErr.message);
 
