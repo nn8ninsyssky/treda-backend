@@ -66,7 +66,7 @@ exports.insertAiCallLog = async (req, res, next) => {
 // update ai call log details
 exports.updateAiCallLog = async (req, res, next) => {
   try {
-    const { call_id, ...data } = req.body;
+    const { call_id, ai_call_conversation,...data } = req.body;
 
     if (!call_id) {
       return res.status(400).json({
@@ -92,7 +92,7 @@ exports.updateAiCallLog = async (req, res, next) => {
 try{
     const db = getDb();
 await db.collection('complaint').updateOne(
-  { call_id: call_id_from_pg },
+  { call_id: call_id },
   {
     $set: {
       ai_call_conversation: ai_call_conversation
