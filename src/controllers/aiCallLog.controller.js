@@ -88,7 +88,19 @@ exports.updateAiCallLog = async (req, res, next) => {
     if (!response.success) {
       return res.status(400).json(response);
     }
+    
+try{
+    const db = getDb();
+await db.collection('complaint').updateOne(
+      { call_id: String(call_id) },
+      {
+        $set: { ai_call_conversation }
+      }
+    );
+}catch(mongoErr){
+      console.error("Mongo insert failed after retries:", mongoErr.message);
 
+}
     return res.status(200).json(response);
 
   } catch (err) {
