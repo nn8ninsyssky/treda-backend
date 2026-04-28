@@ -66,8 +66,8 @@ exports.insertAiCallLog = async (req, res, next) => {
 // update ai call log details
 exports.updateAiCallLog = async (req, res, next) => {
   try {
-    const { call_id, ai_call_conversation,...data } = req.body;
-console.log("conversation updated",ai_call_conversation)
+    const { call_id, ai_call_conversation, ...data } = req.body;
+
     if (!call_id) {
       return res.status(400).json({
         success: false,
@@ -75,6 +75,7 @@ console.log("conversation updated",ai_call_conversation)
       });
     }
 
+    // 1. PostgreSQL update
     const result = await callSP(
       `SELECT sp_update_ai_call_log(:call_id, :data)`,
       {
@@ -88,22 +89,29 @@ console.log("conversation updated",ai_call_conversation)
     if (!response.success) {
       return res.status(400).json(response);
     }
-    
-try{
-    const db = getDb();
-await db.collection('complaint').updateOne(
-  { call_id: call_id },
-  {
-    $set: {
-      ai_call_conversation: ai_call_conversation
-    }
-  },
-  { upsert: true }
-);
-}catch(mongoErr){
-      console.error("Mongo insert failed after retries:", mongoErr.message);
 
-}
+    // 2. Mongo update
+    try {
+      const db = getDb();
+
+      const updateData = {};
+
+      if (ai_call_conversation !== undefined) {
+        updateData.ai_call_conversation = ai_call_conversation;
+      }
+
+      if (Object.keys(updateData).length > 0) {
+        await db.collection('complaint').updateOne(
+          { call_id: String(call_id) },
+          { $set: updateData },
+          { upsert: true } // optional
+        );
+      }
+
+    } catch (mongoErr) {
+      console.error("Mongo update failed:", mongoErr);
+    }
+
     return res.status(200).json(response);
 
   } catch (err) {
