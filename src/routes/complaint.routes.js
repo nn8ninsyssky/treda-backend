@@ -24,3 +24,11 @@ router.put(
   allowRoles(ROLES.TECHNICIAN,ROLES.VENDOR),
   controller.updateComplaintStatus
 );
+
+// get all complaint by admin vendor and technician
+router.get(
+  '/all',
+  authenticate,
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER,ROLES.VENDOR,ROLES.TECHNICIAN),
+  controller.getAllComplaints
+);

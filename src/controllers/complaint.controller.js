@@ -4,9 +4,6 @@ const retryMongoInsert = require('../utils/retryMongo');
 
 const { getDb } = require('../config/db.mongo');
 
-
-
-
 exports.registerComplaint = async (req, res, next) => {
   try {
     const {
@@ -134,6 +131,25 @@ exports.updateComplaintStatus = async (req, res, next) => {
     if (!response.success) {
       return res.status(400).json(response);
     }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+// get all complaint by admin vendor and technician
+exports.getAllComplaints = async (req, res, next) => {
+  try {
+    const result = await callSP(
+      `SELECT sp_get_all_complaints(:user_id)`,
+      {
+        user_id: req.user.id
+      }
+    );
+
+    const response = result?.[0]?.sp_get_all_complaints;
 
     return res.status(200).json(response);
 
