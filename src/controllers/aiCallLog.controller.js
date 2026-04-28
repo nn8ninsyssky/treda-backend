@@ -21,13 +21,13 @@ exports.insertAiCallLog = async (req, res, next) => {
       {
         data: JSON.stringify(
           {
-          customer_id: customer_id || null,
-          complaint_id: complaint_id || null,
-          duration,
-          called_at,
-          purpose,
-          status
-        }
+            customer_id: customer_id || null,
+            complaint_id: complaint_id || null,
+            duration,
+            called_at,
+            purpose,
+            status
+          }
         )
       }
     );
@@ -38,7 +38,7 @@ exports.insertAiCallLog = async (req, res, next) => {
       return res.status(400).json(response);
     }
 
-// 2. Mongo insert with retry
+    // 2. Mongo insert with retry
     try {
       const db = getDb();
 
@@ -46,7 +46,7 @@ exports.insertAiCallLog = async (req, res, next) => {
         return db.collection('ai_call_logs').insertOne({
           call_id: response.call_id,
           ai_call_conversation: ai_call_conversation || "",
-          
+
         });
       });
 
@@ -101,12 +101,18 @@ exports.updateAiCallLog = async (req, res, next) => {
       }
 
       if (Object.keys(updateData).length > 0) {
-        await db.collection('complaint').updateOne(
+        const update_call_log = await db.collection('complaint').updateOne(
           { call_id: String(call_id) },
           { $set: updateData },
-          { upsert: true } // optional
+          { upsert: false } // optional
         );
+        console.log("Mongo update result:", update_call_log);
+
+        if (update_call_log.matchedCount === 0) {
+          console.warn("⚠️ No document found with call_id:", call_id);
+        }
       }
+
 
     } catch (mongoErr) {
       console.error("Mongo update failed:", mongoErr);
