@@ -67,7 +67,7 @@ exports.insertAiCallLog = async (req, res, next) => {
 exports.updateAiCallLog = async (req, res, next) => {
   try {
     const { call_id, ai_call_conversation,...data } = req.body;
-console.log(ai_call_conversation)
+console.log("conversation updated",ai_call_conversation)
     if (!call_id) {
       return res.status(400).json({
         success: false,
@@ -104,7 +104,7 @@ await db.collection('complaint').updateOne(
       console.error("Mongo insert failed after retries:", mongoErr.message);
 
 }
-    return res.status(200).json(response,ai_call_conversation);
+    return res.status(200).json(response);
 
   } catch (err) {
     next(err);
