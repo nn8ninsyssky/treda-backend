@@ -101,7 +101,7 @@ exports.updateAiCallLog = async (req, res, next) => {
       }
 
       if (Object.keys(updateData).length > 0) {
-        const update_call_log = await db.collection('complaint').updateOne(
+        const update_call_log = await db.collection('ai_call_logs').updateOne(
           { call_id: String(call_id) },
           { $set: updateData },
           { upsert: false } // optional
