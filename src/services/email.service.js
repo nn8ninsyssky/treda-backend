@@ -19,7 +19,7 @@ const sendEmail = async ({ to, subject, text }) => {
 
     console.log("📧 Email sent to:", to);
   } catch (err) {
-    console.error("❌ Email failed:", err.message);
+    console.error("Email failed:", err.message);
   }
 };
 
