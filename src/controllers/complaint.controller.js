@@ -69,17 +69,23 @@ exports.registerComplaint = async (req, res, next) => {
 try {
   console.log("Response:", response);
 
+  // ===== VENDOR EMAIL =====
   if (response.vendor_assignment_status === 'accepted') {
     const vendorEmailResult = await callSP(
       `SELECT sp_get_user_email_by_vendor(:vendor_id)`,
       { vendor_id: response.assigned_vendor_id }
     );
 
-    const vendorEmail = vendorEmailResult[0].sp_get_user_email_by_vendor;
-    console.log("Vendor email:", vendorEmail);
+    const vendorEmail =
+      vendorEmailResult?.[0]?.sp_get_user_email_by_vendor;
 
-    if (vendorEmail) {
-      await sendEmail({
+    if (!vendorEmail) {
+      console.warn("⚠️ Vendor email not found");
+    } else {
+      console.log("📧 Sending email to vendor:", vendorEmail);
+
+      // ⚡ DON'T BLOCK RESPONSE
+      sendEmail({
         to: vendorEmail,
         subject: "New Complaint Assigned",
         text: `Complaint ID: ${response.complaint_id}`,
@@ -87,17 +93,23 @@ try {
     }
   }
 
+  // ===== TECHNICIAN EMAIL =====
   if (response.technician_assignment_status === 'accepted') {
     const techEmailResult = await callSP(
       `SELECT sp_get_user_email_by_technician(:technician_id)`,
       { technician_id: response.assigned_technician_id }
     );
 
-    const techEmail = techEmailResult[0].sp_get_user_email_by_technician;
-    console.log("Technician email:", techEmail);
+    const techEmail =
+      techEmailResult?.[0]?.sp_get_user_email_by_technician;
 
-    if (techEmail) {
-      await sendEmail({
+    if (!techEmail) {
+      console.warn("⚠️ Technician email not found");
+    } else {
+      console.log("📧 Sending email to technician:", techEmail);
+
+      // ⚡ fire-and-forget
+      sendEmail({
         to: techEmail,
         subject: "New Task Assigned",
         text: `Complaint ID: ${response.complaint_id}`,
@@ -106,7 +118,7 @@ try {
   }
 
 } catch (emailErr) {
-  console.error("Email error:", emailErr);
+  console.error("❌ Email error:", emailErr);
 }
 
     res.status(201).json(response);

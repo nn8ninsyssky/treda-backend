@@ -1,30 +1,30 @@
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-  host: '74.125.200.108', // Gmail SMTP IPv4 (critical fix)
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
+const axios = require('axios');
 
 const sendEmail = async ({ to, subject, text }) => {
   try {
-    await transporter.sendMail({
-      from: `"TREDA Support" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      text,
-    });
+    const res = await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: {
+          name: "TREDA Support",
+          email: process.env.EMAIL_USER
+        },
+        to: [{ email: to }],
+        subject: subject,
+        textContent: text
+      },
+      {
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
-    console.log("📧 Email sent to:", to);
+    console.log("📧 Email sent:", to, res.data.messageId);
+
   } catch (err) {
-    console.error("Email failed:", err.message);
+    console.error("❌ Email failed:", err.response?.data || err.message);
   }
 };
 
