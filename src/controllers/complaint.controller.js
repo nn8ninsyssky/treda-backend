@@ -4,6 +4,83 @@ const retryMongoInsert = require('../utils/retryMongo');
 
 const { getDb } = require('../config/db.mongo');
 
+// exports.registerComplaint = async (req, res, next) => {
+//   try {
+//     const {
+//       device_qr_id,
+//       vendor_id,
+//       complaint_type,
+//       complaint_priority,
+//       complaint_status,
+
+//       complaint_description,      
+//       complaint_resolution_notes,
+//       complaint_visit_notes
+//     } = req.body;
+
+//     // 1. PostgreSQL insert
+//     const result = await callSP(
+//       `SELECT sp_register_complaint(
+//         :user_id,
+//         :device_qr_id,
+//         :vendor_id,
+//         :complaint_type,
+//         :complaint_priority,
+//         :complaint_status
+//       )`,
+//       {
+//         user_id: req.user ? req.user.id : null,
+//         device_qr_id,
+//         vendor_id,
+//         complaint_type,
+//         complaint_priority,
+//         complaint_status   
+
+//       }
+//     );
+
+//     const response = result?.[0]?.sp_register_complaint;
+
+//     if (!response.success) {
+//       return res.status(400).json(response);
+//     }
+
+//     // 2. Mongo insert with retry
+//     try {
+//       const db = getDb();
+
+//       await retryMongoInsert(async () => {
+//         return db.collection('complaint').insertOne({
+//           complaint_id: response.complaint_id,
+//           complaint_description: complaint_description || "",
+//           complaint_resolution_notes: complaint_resolution_notes || "",
+//           complaint_visit_notes: complaint_visit_notes || "",
+//           created_at: new Date()
+//         });
+//       });
+
+//     } catch (mongoErr) {
+//       console.error("Mongo insert failed after retries:", mongoErr.message);
+//       // DO NOT fail API
+//     }
+// if (response.success) {
+//   if (response.vendor_assignment_status === 'accepted') {
+//     // send notification to vendor
+//   }
+
+//   if (response.technician_assignment_status === 'accepted') {
+//     // send notification to technician
+//   }
+// }
+//     res.status(201).json(response);
+
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+const { sendEmail } = require('../services/email.service');
+
 exports.registerComplaint = async (req, res, next) => {
   try {
     const {
@@ -12,8 +89,7 @@ exports.registerComplaint = async (req, res, next) => {
       complaint_type,
       complaint_priority,
       complaint_status,
-
-      complaint_description,      
+      complaint_description,
       complaint_resolution_notes,
       complaint_visit_notes
     } = req.body;
@@ -34,8 +110,7 @@ exports.registerComplaint = async (req, res, next) => {
         vendor_id,
         complaint_type,
         complaint_priority,
-        complaint_status   
-
+        complaint_status
       }
     );
 
@@ -45,7 +120,7 @@ exports.registerComplaint = async (req, res, next) => {
       return res.status(400).json(response);
     }
 
-    // 2. Mongo insert with retry
+    // 2. Mongo insert
     try {
       const db = getDb();
 
@@ -60,8 +135,47 @@ exports.registerComplaint = async (req, res, next) => {
       });
 
     } catch (mongoErr) {
-      console.error("Mongo insert failed after retries:", mongoErr.message);
-      // DO NOT fail API
+      console.error("Mongo insert failed:", mongoErr.message);
+    }
+
+    //  3. EMAIL NOTIFICATION
+    try {
+      if (response.vendor_assignment_status === 'accepted') {
+        const vendorEmailResult = await callSP(
+          `SELECT sp_get_user_email_by_vendor(:vendor_id)`,
+          { vendor_id }
+        );
+
+        const vendorEmail = vendorEmailResult[0].sp_get_user_email_by_vendor;
+
+        if (vendorEmail) {
+          await sendEmail({
+            to: vendorEmail,
+            subject: "New Complaint Assigned",
+            text: `A new complaint (${response.complaint_id}) has been assigned to you.`,
+          });
+        }
+      }
+
+      if (response.technician_assignment_status === 'accepted') {
+        const techEmailResult = await callSP(
+          `SELECT sp_get_user_email_by_technician(:technician_id)`,
+          { technician_id: response.technician_id }
+        );
+
+        const techEmail = techEmailResult[0].sp_get_user_email_by_technician;
+
+        if (techEmail) {
+          await sendEmail({
+            to: techEmail,
+            subject: "New Task Assigned",
+            text: `You have been assigned a complaint (${response.complaint_id}).`,
+          });
+        }
+      }
+
+    } catch (emailErr) {
+      console.error("Email error:", emailErr.message);
     }
 
     res.status(201).json(response);
@@ -70,8 +184,6 @@ exports.registerComplaint = async (req, res, next) => {
     next(err);
   }
 };
-
-
 exports.getComplaintByDeviceQR = async (req, res, next) => {
   try {
     const { device_qr_id } = req.params;
