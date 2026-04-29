@@ -66,6 +66,32 @@ exports.registerComplaint = async (req, res, next) => {
 
     //  3. EMAIL NOTIFICATION
     
+    const detailsResult = await callSP(
+  `SELECT sp_get_complaint_by_device_qr(:device_qr_id)`,
+  { device_qr_id }
+);
+
+const details = detailsResult?.[0]?.sp_get_complaint_by_device_qr;
+
+console.log("Full complaint details:", details);
+const emailText = `
+Complaint Details:
+
+Complaint ID: ${details.complaint_id}
+Device QR: ${details.device_qr_id}
+Type: ${details.complaint_type}
+Priority: ${details.complaint_priority}
+Status: ${details.complaint_status}
+
+Vendor:
+Name: ${details.vendor?.vendor_name}
+Phone: ${details.vendor?.vendor_phone}
+
+Technician:
+Name: ${details.technician?.technician_name}
+Phone: ${details.technician?.technician_phone}
+`;
+
 try {
   console.log("Response:", response);
 
@@ -80,15 +106,15 @@ try {
       vendorEmailResult?.[0]?.sp_get_user_email_by_vendor;
 
     if (!vendorEmail) {
-      console.warn("⚠️ Vendor email not found");
+      console.warn("Vendor email not found");
     } else {
-      console.log("📧 Sending email to vendor:", vendorEmail);
+      console.log("Sending email to vendor:", vendorEmail);
 
       // ⚡ DON'T BLOCK RESPONSE
       sendEmail({
         to: vendorEmail,
         subject: "New Complaint Assigned",
-        text: `Complaint ID: ${response.complaint_id}`,
+        text: emailText,
       });
     }
   }
@@ -104,21 +130,21 @@ try {
       techEmailResult?.[0]?.sp_get_user_email_by_technician;
 
     if (!techEmail) {
-      console.warn("⚠️ Technician email not found");
+      console.warn(" Technician email not found");
     } else {
-      console.log("📧 Sending email to technician:", techEmail);
+      console.log("Sending email to technician:", techEmail);
 
       // ⚡ fire-and-forget
       sendEmail({
         to: techEmail,
         subject: "New Task Assigned",
-        text: `Complaint ID: ${response.complaint_id}`,
+        text: emailText,
       });
     }
   }
 
 } catch (emailErr) {
-  console.error("❌ Email error:", emailErr);
+  console.error("Email error:", emailErr);
 }
 
     res.status(201).json(response);
