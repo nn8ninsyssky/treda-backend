@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
+const { allowRoles,ROLES } = require('../middlewares/roleCheck');
 const controller = require('../controllers/aiCallLog.controller') ;
 const authenticate = require('../middlewares/auth');
 
@@ -10,10 +10,18 @@ router.post(
   //allowRoles(ROLES.TREDA_OFFICER, ROLES.VENDOR, ROLES.TECHNICIAN),
   controller.insertAiCallLog
 );
-module.exports = router;
-
 // update ai call log details
 router.put(
   '/update',
   controller.updateAiCallLog
 );
+// for getting all ai_call_logs details for admin
+router.get('/getallcalllogs',
+  authenticate,
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
+  controller.getAllAiCallLogs);
+
+module.exports = router;
+
+
+

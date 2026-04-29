@@ -124,3 +124,29 @@ exports.updateAiCallLog = async (req, res, next) => {
     next(err);
   }
 };
+
+// for getting all ai_call_logs details for admin
+exports.getAllAiCallLogs = async (req, res, next) => {
+  try {
+    const { limit = 50, offset = 0 } = req.query;
+
+    const result = await callSP(
+      `SELECT sp_get_all_ai_call_logs(:limit, :offset)`,
+      {
+        limit: Number(limit),
+        offset: Number(offset)
+      }
+    );
+
+    const response = result?.[0]?.sp_get_all_ai_call_logs;
+
+    if (!response?.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
