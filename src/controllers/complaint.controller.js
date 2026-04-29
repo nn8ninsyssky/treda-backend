@@ -52,7 +52,7 @@ exports.registerComplaint = async (req, res, next) => {
 
       await retryMongoInsert(async () => {
         return db.collection('complaint').insertOne({
-          complaint_id: response.complaint_id,
+          complaint_no: response.complaint_no,
           complaint_description: complaint_description || "",
           complaint_resolution_notes: complaint_resolution_notes || "",
           complaint_visit_notes: complaint_visit_notes || "",
@@ -77,7 +77,7 @@ console.log("Full complaint details:", details);
 const emailText = `
 Complaint Details:
 
-Complaint ID: ${details?.complaint_id}
+Complaint NO: ${details?.complaint_no}
 Device QR: ${details?.device_qr_id}
 Type: ${details?.type}
 Priority: ${details?.priority}
