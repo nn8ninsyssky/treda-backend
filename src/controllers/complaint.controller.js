@@ -71,25 +71,30 @@ exports.registerComplaint = async (req, res, next) => {
   { device_qr_id }
 );
 
-const details = detailsResult?.[0]?.sp_get_complaint_by_device_qr;
+const details = detailsResult?.[0]?.sp_get_complaint_by_device_qr.data;
 
 console.log("Full complaint details:", details);
 const emailText = `
 Complaint Details:
 
-Complaint ID: ${details.complaint_id}
-Device QR: ${details.device_qr_id}
-Type: ${details.complaint_type}
-Priority: ${details.complaint_priority}
-Status: ${details.complaint_status}
+Complaint ID: ${details?.complaint_id}
+Device QR: ${details?.device_qr_id}
+Type: ${details?.complaint_type}
+Priority: ${details?.complaint_priority}
+Status: ${details?.complaint_status}
 
 Vendor:
-Name: ${details.vendor?.vendor_name}
-Phone: ${details.vendor?.vendor_phone}
-
+Name: ${details.vendor?.name}
+Phone: ${details.vendor?.phone}
+Disctrict:${details.vendor?.district}
+State:${details.vendor?.state}
+Country:${details.vendor?.country}
+Status:${details.vendor?.status}
 Technician:
-Name: ${details.technician?.technician_name}
-Phone: ${details.technician?.technician_phone}
+Name: ${details.technician?.name}
+Phone: ${details.technician?.phone}
+Specialization:${details.technician?.specialization}
+Status:${details.technician?.status}
 `;
 
 try {
