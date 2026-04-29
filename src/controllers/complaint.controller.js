@@ -79,10 +79,10 @@ Complaint Details:
 
 Complaint ID: ${details?.complaint_id}
 Device QR: ${details?.device_qr_id}
-Type: ${details?.complaint_type}
-Priority: ${details?.complaint_priority}
-Status: ${details?.complaint_status}
-
+Type: ${details?.type}
+Priority: ${details?.priority}
+Status: ${details?.status}
+complaint_at:${details?.updated_at}
 Vendor:
 Name: ${details.vendor?.name}
 Phone: ${details.vendor?.phone}
