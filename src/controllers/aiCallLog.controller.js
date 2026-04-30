@@ -180,7 +180,7 @@ exports.getAllAiCallLogs = async (req, res, next) => {
     const callIds = logs.map(log => String(log.call_id));
 
     // 4. Fetch conversations from Mongo
-    const conversations = await db.collection('complaint')
+    const conversations = await db.collection('ai_call_logs')
       .find({ call_id: { $in: callIds } })
       .toArray();
 
