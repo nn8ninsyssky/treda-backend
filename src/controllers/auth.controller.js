@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const logger = require('../utils/logger');
 const { User, Customer,Vendor,sequelize } = require('../models/pg');
 const { callSP } = require('../config/db.postgres');
+const crypto = require('crypto');
+const { sendEmail } = require('../services/email.service');
 
 
 /**
@@ -26,7 +28,7 @@ const generateTokens = (user) => {
 
 
 
-// Registration //
+// Customer Registration //
 
 exports.registerCustomer = async (req, res, next) => {
   try {
@@ -73,7 +75,7 @@ exports.registerCustomer = async (req, res, next) => {
 
 
 /**
- * LOGIN
+ * Customer LOGIN
  */
 
 exports.loginCustomer = async (req, res, next) => {
@@ -105,7 +107,76 @@ exports.loginCustomer = async (req, res, next) => {
 
 
 //Vendor registration
+exports.sendVendorEmailOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
 
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required"
+      });
+    }
+
+    // 1. Generate OTP (6 digits)
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 2. Store OTP in DB
+    const result = await callSP(
+      `SELECT sp_store_email_otp(:email, :otp)`,
+      { email, otp }
+    );
+
+    const response = result?.[0]?.sp_store_email_otp;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    // 3. Send Email (IMPORTANT)
+    await sendEmail({
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP is ${otp}. It will expire in 5 minutes.`
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully"
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+exports.verifyVendorEmailOtp = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required"
+      });
+    }
+
+    const result = await callSP(
+      `SELECT sp_verify_email_otp(:email, :otp)`,
+      { email, otp }
+    );
+
+    const response = result?.[0]?.sp_verify_email_otp;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
 exports.registerVendor = async (req, res, next) => {
   try {
     

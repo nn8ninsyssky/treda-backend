@@ -34,6 +34,9 @@ router.post(
 );
 // REGISTER Vendor
 
+router.post('/vendor-send-otp', controller.sendVendorEmailOtp);
+router.post('/vendor-verify-otp', controller.verifyVendorEmailOtp);
+
 router.post(
   '/register/vendor',
 authenticate,
@@ -70,7 +73,7 @@ router.post(
 // LOGIN Treda Officer
 router.post(
   '/login/treda/admin',
-
+//allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN),
   validate(loginTredaOfficerSchema),
   controller.loginTredaAdmin
 );
