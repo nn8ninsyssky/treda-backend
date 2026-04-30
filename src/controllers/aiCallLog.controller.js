@@ -126,10 +126,37 @@ exports.updateAiCallLog = async (req, res, next) => {
 };
 
 // for getting all ai_call_logs details for admin
+
+// exports.getAllAiCallLogs = async (req, res, next) => {
+//   try {
+//     const { limit = 50, offset = 0 } = req.query;
+
+//     const result = await callSP(
+//       `SELECT sp_get_all_ai_call_logs(:limit, :offset)`,
+//       {
+//         limit: Number(limit),
+//         offset: Number(offset)
+//       }
+//     );
+
+//     const response = result?.[0]?.sp_get_all_ai_call_logs;
+
+//     if (!response?.success) {
+//       return res.status(400).json(response);
+//     }
+
+//     return res.status(200).json(response);
+
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 exports.getAllAiCallLogs = async (req, res, next) => {
   try {
     const { limit = 50, offset = 0 } = req.query;
 
+    // 1. Get logs from PostgreSQL
     const result = await callSP(
       `SELECT sp_get_all_ai_call_logs(:limit, :offset)`,
       {
@@ -144,7 +171,35 @@ exports.getAllAiCallLogs = async (req, res, next) => {
       return res.status(400).json(response);
     }
 
-    return res.status(200).json(response);
+    const logs = response.data || [];
+
+    // 2. Get Mongo DB instance
+    const db = getDb();
+
+    // 3. Extract all call_ids
+    const callIds = logs.map(log => String(log.call_id));
+
+    // 4. Fetch conversations from Mongo
+    const conversations = await db.collection('complaint')
+      .find({ call_id: { $in: callIds } })
+      .toArray();
+
+    // 5. Convert to map for fast lookup
+    const conversationMap = {};
+    conversations.forEach(doc => {
+      conversationMap[doc.call_id] = doc.ai_call_conversation;
+    });
+
+    // 6. Merge Postgres + Mongo
+    const finalData = logs.map(log => ({
+      ...log,
+      ai_call_conversation: conversationMap[String(log.call_id)] || []
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: finalData
+    });
 
   } catch (err) {
     next(err);
