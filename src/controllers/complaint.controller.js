@@ -98,7 +98,6 @@ Status:${details.technician?.status}
 `;
 
 try {
-  console.log("Response:", response);
 
   // ===== VENDOR EMAIL =====
   if (response.vendor_assignment_status === 'accepted') {
@@ -115,7 +114,7 @@ try {
     } else {
       console.log("Sending email to vendor:", vendorEmail);
 
-      // ⚡ DON'T BLOCK RESPONSE
+      // DON'T BLOCK RESPONSE
       sendEmail({
         to: vendorEmail,
         subject: "New Complaint Assigned",
@@ -139,7 +138,7 @@ try {
     } else {
       console.log("Sending email to technician:", techEmail);
 
-      // ⚡ fire-and-forget
+      // fire-and-forget
       sendEmail({
         to: techEmail,
         subject: "New Task Assigned",
@@ -226,16 +225,153 @@ exports.updateComplaintStatus = async (req, res, next) => {
 };
 
 // get all complaint by admin vendor and technician
+// exports.getAllComplaints = async (req, res, next) => {
+//   try {
+//     const result = await callSP(
+//       `SELECT sp_get_all_complaints(:user_id)`,
+//       {
+//         user_id: req.user.id
+//       }
+//     );
+
+//     const response = result?.[0]?.sp_get_all_complaints;
+
+// try {
+
+//   // ===== Admin EMAIL =====
+//   if (response.vendor_assignment_status === 'rejected') {
+//     const adminEmailResult = await callSP(
+//       `SELECT sp_get_admin_and_officer_emails`,
+      
+//     );
+
+//     const adminEmail =
+//       adminEmailResult?.[0]?.sp_get_admin_and_officer_emails;
+
+//     if (!adminEmail) {
+//       console.warn("Admin email not found");
+//     } else {
+//       console.log("Sending email to admin:", adminEmail);
+
+//       // DON'T BLOCK RESPONSE
+//       sendEmail({
+//         to: adminEmail,
+//         subject: "Vendor has rejected the complaint",
+//         text: response,
+//       });
+//     }
+//   }
+
+//   // ===== VENDOR EMAIL =====
+//   if (response.vendor_assignment_status === 'accepted' && response.technician_assignment_status === 'rejected') {
+    
+
+//     const vendorEmailResult = await callSP(
+//       `SELECT sp_get_user_email_by_vendor(:vendor_id)`,
+//       { vendor_id: response.assigned_vendor_id }
+//     );
+
+//     const vendorEmail =
+//       vendorEmailResult?.[0]?.sp_get_user_email_by_vendor;
+
+//     if (!vendorEmail) {
+//       console.warn("Vendor email not found");
+//     } else {
+//       console.log("Sending email to vendor:", vendorEmail);
+
+//       // DON'T BLOCK RESPONSE
+//       sendEmail({
+//         to: vendorEmail,
+//         subject: "Technician has rejected the complaint!",
+//         text: response,
+//       });
+//     }
+  
+    
+//   }
+
+// } catch (emailErr) {
+//   console.error("Email error:", emailErr);
+// }
+
+//     return res.status(200).json(response);
+
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 exports.getAllComplaints = async (req, res, next) => {
   try {
     const result = await callSP(
       `SELECT sp_get_all_complaints(:user_id)`,
-      {
-        user_id: req.user.id
-      }
+      { user_id: req.user.id }
     );
 
     const response = result?.[0]?.sp_get_all_complaints;
+
+    // 🔥 Ensure it's an array
+    const complaints = response?.data || [];
+
+    try {
+
+      // ===== Fetch admin/officer emails once =====
+      const adminEmailResult = await callSP(
+        `SELECT sp_get_admin_and_officer_emails()`
+      );
+
+      const adminData =
+        adminEmailResult?.[0]?.sp_get_admin_and_officer_emails;
+
+      const adminEmails =
+        adminData?.data?.map(u => u.email) || [];
+
+      // ===== Loop all complaints =====
+      for (const complaint of complaints) {
+
+        // ===== CASE 1: Vendor rejected → notify admin/officers =====
+        if (complaint.vendor_assignment_status === 'rejected') {
+
+          if (adminEmails.length) {
+            console.log("Sending email to admins:", adminEmails);
+
+            sendEmail({
+              to: adminEmails, // array supported
+              subject: "Vendor has rejected the complaint",
+              text: `Complaint ${complaint.complaint_no} was rejected by vendor.`,
+            });
+          }
+        }
+
+        // ===== CASE 2: Vendor accepted but technician rejected → notify vendor =====
+        if (
+          complaint.vendor_assignment_status === 'accepted' &&
+          complaint.technician_assignment_status === 'rejected'
+        ) {
+
+          const vendorEmailResult = await callSP(
+            `SELECT sp_get_user_email_by_vendor(:vendor_id)`,
+            { vendor_id: complaint.assigned_vendor_id }
+          );
+
+          const vendorEmail =
+            vendorEmailResult?.[0]?.sp_get_user_email_by_vendor;
+
+          if (vendorEmail) {
+            console.log("Sending email to vendor:", vendorEmail);
+
+            sendEmail({
+              to: vendorEmail,
+              subject: "Technician has rejected the complaint!",
+              text: `Technician rejected complaint ${complaint.complaint_no}`,
+            });
+          }
+        }
+      }
+
+    } catch (emailErr) {
+      console.error("Email error:", emailErr);
+    }
 
     return res.status(200).json(response);
 
