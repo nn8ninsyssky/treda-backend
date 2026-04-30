@@ -179,49 +179,115 @@ exports.verifyVendorEmailOtp = async (req, res, next) => {
 };
 exports.registerVendor = async (req, res, next) => {
   try {
-    
     const {
-  name, email, password,
-   company_reg_no, vendor_gst_no,
-  contact_person, vendor_phone,
-  district, state, country,
-  lat, long
-} = req.body;
+      name, email, password,
+      company_reg_no, vendor_gst_no,
+      contact_person, vendor_phone,
+      district, state, country,
+      lat, long
+    } = req.body;
 
-    logger.push("Body:",req.body);
-    console.log("Body:",req.body);
-    const result= await callSP(
-  `SELECT sp_register_vendor(
-    :name, :email, :password,
-     :company_reg_no, :vendor_gst_no,
-    :contact_person, :vendor_phone,
-    :district, :state, :country,
-    :lat, :long
-  )`,
-  {
-    name, email, password,
-     company_reg_no, vendor_gst_no,
-    contact_person, vendor_phone,
-    district, state, country,
-    lat, long
-  }
-);
+    const result = await callSP(
+      `SELECT sp_register_vendor(
+        :name, :email, :password,
+        :company_reg_no, :vendor_gst_no,
+        :contact_person, :vendor_phone,
+        :district, :state, :country,
+        :lat, :long
+      )`,
+      {
+        name, email, password,
+        company_reg_no, vendor_gst_no,
+        contact_person, vendor_phone,
+        district, state, country,
+        lat, long
+      }
+    );
+
     const response = result[0].sp_register_vendor;
-logger.push("response",response);
-console.log("response",response);
+
     if (!response.success) {
       return res.status(400).json(response);
     }
 
-    res.status(201).json(response);
+    // SEND EMAIL AFTER SUCCESS
+    try {
+      await sendEmail({
+        to: email,
+        subject: "Vendor Registration Successful",
+        text: `
+Hello ${name},
+
+Your vendor account has been successfully created.
+
+Login Details:
+Email: ${email}
+Password: ${password}
+
+Please login and change your password after first login.
+
+Thank you.
+        `
+      });
+    } catch (mailErr) {
+      console.error("Email sending failed:", mailErr.message);
+      // ❗ Don't fail API because of email issue
+    }
+
+    return res.status(201).json(response);
 
   } catch (err) {
     next(err);
   }
 };
 
+// exports.registerVendor = async (req, res, next) => {
+//   try {
+    
+//     const {
+//   name, email, password,
+//    company_reg_no, vendor_gst_no,
+//   contact_person, vendor_phone,
+//   district, state, country,
+//   lat, long
+// } = req.body;
+
+//     logger.push("Body:",req.body);
+//     console.log("Body:",req.body);
+//     const result= await callSP(
+//   `SELECT sp_register_vendor(
+//     :name, :email, :password,
+//      :company_reg_no, :vendor_gst_no,
+//     :contact_person, :vendor_phone,
+//     :district, :state, :country,
+//     :lat, :long
+//   )`,
+//   {
+//     name, email, password,
+//      company_reg_no, vendor_gst_no,
+//     contact_person, vendor_phone,
+//     district, state, country,
+//     lat, long
+//   }
+// );
+//     const response = result[0].sp_register_vendor;
+// logger.push("response",response);
+// console.log("response",response);
+//     if (!response.success) {
+//       return res.status(400).json(response);
+//     }
+
+//     res.status(201).json(response);
+
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
 
 // vendor login
+
+
 
 exports.loginVendor = async (req, res, next) => {
   try {
