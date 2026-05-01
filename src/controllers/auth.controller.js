@@ -125,8 +125,7 @@ exports.forgotPassword = async (req, res, next) => {
     }
 
     // 🔥 Create reset link
-    const resetLink = `https://
-    /reset-password?email=${email}&token=${token}`;
+    const resetLink = `https://unstable-follow-quarrel-.ngrok-free.dev/reset-password?email=${email}&token=${token}`;
 
     // Send email
     await sendEmail({
