@@ -327,7 +327,7 @@ exports.registerTechnician = async (req, res, next) => {
       return res.status(400).json(response);
     }
 
-    // ✅ SEND EMAIL AFTER SUCCESS
+    // SEND EMAIL AFTER SUCCESS
     try {
       await sendEmail({
         to: email,
@@ -339,8 +339,10 @@ Your technician account has been successfully created.
 
 Login Details:
 Email: ${email}
+Password:${password}
 
-⚠️ For security reasons, please contact your vendor for password or reset it.
+Please login and change your password after first login.
+
 
 Thank you.
         `
