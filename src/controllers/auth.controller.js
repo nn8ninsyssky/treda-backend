@@ -130,8 +130,31 @@ exports.registerCustomer = async (req, res, next) => {
       return res.status(400).json(response);
     }
 
-    // ✅ ONLY backend logic allowed → JWT
+    // Generate JWT
     const tokens = generateTokens(response);
+
+    // SEND EMAIL
+    try {
+      await sendEmail({
+        to: email,
+        subject: "Customer Registration Successful",
+        text: `
+Hello ${name},
+
+Your account has been successfully created.
+
+Login Details:
+Email: ${email}
+Password: ${password}
+
+Please login and change your password after first login.
+
+Thank you.
+        `
+      });
+    } catch (mailErr) {
+      console.error("Email failed:", mailErr.message);
+    }
 
     res.status(201).json({
       ...response,
@@ -280,11 +303,21 @@ exports.loginVendor = async (req, res, next) => {
 // Technician Registration
 exports.registerTechnician = async (req, res, next) => {
   try {
+    const { email, name, password } = req.body;
+
+    // Optional basic validation
+    if (!email || !password || !name) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email and password are required"
+      });
+    }
+
     const result = await callSP(
       `SELECT sp_register_technician_by_vendor(:user_id, :data)`,
       {
-        user_id: req.user.id, // ✅ from JWT
-        data: JSON.stringify(req.body) // ✅ full payload
+        user_id: req.user.id,
+        data: JSON.stringify(req.body)
       }
     );
 
@@ -292,6 +325,29 @@ exports.registerTechnician = async (req, res, next) => {
 
     if (!response.success) {
       return res.status(400).json(response);
+    }
+
+    // ✅ SEND EMAIL AFTER SUCCESS
+    try {
+      await sendEmail({
+        to: email,
+        subject: "Technician Registration Successful",
+        text: `
+Hello ${name},
+
+Your technician account has been successfully created.
+
+Login Details:
+Email: ${email}
+
+⚠️ For security reasons, please contact your vendor for password or reset it.
+
+Thank you.
+        `
+      });
+    } catch (mailErr) {
+      console.error("Email sending failed:", mailErr.message);
+      // Do not fail API
     }
 
     return res.status(201).json(response);
