@@ -97,6 +97,83 @@ exports.verifyVendorEmailOtp = async (req, res, next) => {
     next(err);
   }
 };
+//forgot password controller function for all roles...
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required"
+      });
+    }
+
+    // Generate token
+    const token = require('crypto').randomBytes(32).toString('hex');
+
+    // Store token
+    const result = await callSP(
+      `SELECT sp_create_password_reset(:email, :token)`,
+      { email, token }
+    );
+
+    const response = result?.[0]?.sp_create_password_reset;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    // 🔥 Create reset link
+    const resetLink = `https://
+    /reset-password?email=${email}&token=${token}`;
+
+    // Send email
+    await sendEmail({
+      to: email,
+      subject: "Reset Your Password",
+      text: `Click the link to reset your password:\n${resetLink}\n\nLink expires in 10 minutes.`
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset link sent"
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Reset password  controller function for all roles...
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { email, token, new_password } = req.body;
+
+    if (!email || !token || !new_password) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields"
+      });
+    }
+
+    const result = await callSP(
+      `SELECT sp_reset_password(:email, :token, :new_password)`,
+      { email, token, new_password }
+    );
+
+    const response = result?.[0]?.sp_reset_password;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
 
 // Customer Registration //
 

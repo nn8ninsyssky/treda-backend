@@ -16,7 +16,11 @@ const {
   loginTredaOfficerSchema,
   refreshSchema
 } = require('../validators/auth.validator');
-
+// routes that are common for all roles...
+router.post('/vendor-send-otp', controller.sendVendorEmailOtp);
+router.post('/vendor-verify-otp', controller.verifyVendorEmailOtp);
+router.post('/forgot-password', controller.forgotPassword);
+router.post('/reset-password', controller.resetPassword);
 // REGISTER Customer
 router.post(
   '/register/customer',
@@ -33,10 +37,6 @@ router.post(
   controller.loginCustomer
 );
 // REGISTER Vendor
-
-router.post('/vendor-send-otp', controller.sendVendorEmailOtp);
-router.post('/vendor-verify-otp', controller.verifyVendorEmailOtp);
-
 router.post(
   '/register/vendor',
 authenticate,
