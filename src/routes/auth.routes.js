@@ -21,6 +21,12 @@ router.post('/vendor-send-otp', controller.sendVendorEmailOtp);
 router.post('/vendor-verify-otp', controller.verifyVendorEmailOtp);
 router.post('/forgot-password', controller.forgotPassword);
 router.post('/reset-password', controller.resetPassword);
+router.post(
+  '/change-password',
+  authenticate, // REQUIRED
+  controller.changePassword
+);
+
 // REGISTER Customer
 router.post(
   '/register/customer',

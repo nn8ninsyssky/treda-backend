@@ -173,6 +173,59 @@ exports.resetPassword = async (req, res, next) => {
     next(err);
   }
 };
+// Change Password for all roles...
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { old_password, new_password } = req.body;
+
+    if (!old_password || !new_password) {
+      return res.status(400).json({
+        success: false,
+        message: "Old and new password are required"
+      });
+    }
+
+    const result = await callSP(
+      `SELECT sp_change_password(:user_id, :old_password, :new_password)`,
+      {
+        user_id: req.user.id, //  from JWT
+        old_password,
+        new_password
+      }
+    );
+
+    const response = result?.[0]?.sp_change_password;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    //  Send Email Notification
+    try {
+      await sendEmail({
+        to: response.email,
+        subject: "Password Changed Successfully",
+        text: `
+Hello ${response.name},
+
+Your password has been successfully changed.
+
+If this was not you, please contact support immediately.
+
+Thank you.
+        `
+      });
+    } catch (mailErr) {
+      console.error("Email failed:", mailErr.message);
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 // Customer Registration //
 
