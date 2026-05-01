@@ -26,7 +26,77 @@ const generateTokens = (user) => {
   return { accessToken, refreshToken };
 };
 
+//Email verification For all registration
+exports.sendVendorEmailOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
 
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required"
+      });
+    }
+
+    // 1. Generate OTP (6 digits)
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 2. Store OTP in DB
+    const result = await callSP(
+      `SELECT sp_store_email_otp(:email, :otp)`,
+      { email, otp }
+    );
+
+    const response = result?.[0]?.sp_store_email_otp;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    // 3. Send Email (IMPORTANT)
+    await sendEmail({
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP is ${otp}. It will expire in 5 minutes.`
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully"
+    });
+
+  } catch (err) {
+    next(err);
+  }
+};
+exports.verifyVendorEmailOtp = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and OTP are required"
+      });
+    }
+
+    const result = await callSP(
+      `SELECT sp_verify_email_otp(:email, :otp)`,
+      { email, otp }
+    );
+
+    const response = result?.[0]?.sp_verify_email_otp;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
 
 // Customer Registration //
 
@@ -107,76 +177,7 @@ exports.loginCustomer = async (req, res, next) => {
 
 
 //Vendor registration
-exports.sendVendorEmailOtp = async (req, res, next) => {
-  try {
-    const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required"
-      });
-    }
-
-    // 1. Generate OTP (6 digits)
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // 2. Store OTP in DB
-    const result = await callSP(
-      `SELECT sp_store_email_otp(:email, :otp)`,
-      { email, otp }
-    );
-
-    const response = result?.[0]?.sp_store_email_otp;
-
-    if (!response.success) {
-      return res.status(400).json(response);
-    }
-
-    // 3. Send Email (IMPORTANT)
-    await sendEmail({
-      to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP is ${otp}. It will expire in 5 minutes.`
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "OTP sent successfully"
-    });
-
-  } catch (err) {
-    next(err);
-  }
-};
-exports.verifyVendorEmailOtp = async (req, res, next) => {
-  try {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        success: false,
-        message: "Email and OTP are required"
-      });
-    }
-
-    const result = await callSP(
-      `SELECT sp_verify_email_otp(:email, :otp)`,
-      { email, otp }
-    );
-
-    const response = result?.[0]?.sp_verify_email_otp;
-
-    if (!response.success) {
-      return res.status(400).json(response);
-    }
-
-    return res.status(200).json(response);
-
-  } catch (err) {
-    next(err);
-  }
-};
 exports.registerVendor = async (req, res, next) => {
   try {
     const {
@@ -240,50 +241,6 @@ Thank you.
     next(err);
   }
 };
-
-// exports.registerVendor = async (req, res, next) => {
-//   try {
-    
-//     const {
-//   name, email, password,
-//    company_reg_no, vendor_gst_no,
-//   contact_person, vendor_phone,
-//   district, state, country,
-//   lat, long
-// } = req.body;
-
-//     logger.push("Body:",req.body);
-//     console.log("Body:",req.body);
-//     const result= await callSP(
-//   `SELECT sp_register_vendor(
-//     :name, :email, :password,
-//      :company_reg_no, :vendor_gst_no,
-//     :contact_person, :vendor_phone,
-//     :district, :state, :country,
-//     :lat, :long
-//   )`,
-//   {
-//     name, email, password,
-//      company_reg_no, vendor_gst_no,
-//     contact_person, vendor_phone,
-//     district, state, country,
-//     lat, long
-//   }
-// );
-//     const response = result[0].sp_register_vendor;
-// logger.push("response",response);
-// console.log("response",response);
-//     if (!response.success) {
-//       return res.status(400).json(response);
-//     }
-
-//     res.status(201).json(response);
-
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
 
 // vendor login
 

@@ -38,7 +38,7 @@ router.put(
   "/technician/:user_id",
   authenticate,
   allowRoles(ROLES.VENDOR),
-  controller.updateMyTechnicianByAdmin
+  controller.updateMyTechnicianByVendor
 );
 
 //for all technician fetch by vendor

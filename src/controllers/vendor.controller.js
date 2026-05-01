@@ -62,7 +62,7 @@ exports.delete = async (req, res, next) => {
 
 // For Technician Update by Vendor
 
-exports.updateMyTechnicianByAdmin = async (req, res, next) => {
+exports.updateMyTechnicianByVendor = async (req, res, next) => {
   try {
     const result = await callSP(
       `SELECT sp_update_technician_by_admin(:user_id, :data)`,
