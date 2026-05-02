@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const controller = require('../controllers/customer.controller') ;
+const controller = require('../controllers/panchayat.controller') ;
 const authenticate = require('../middlewares/auth');
 
 
 const validate = require('../middlewares/validate');
-const { updatecustomerSchema } = require('../validators/customer.validator');
+const { updatePanchayatSchema } = require('../validators/panchayat.validator');
 
 
 const { allowRoles,ROLES } = require('../middlewares/roleCheck');
@@ -14,15 +14,15 @@ const { allowRoles,ROLES } = require('../middlewares/roleCheck');
 router.get(
   '/me',
   authenticate,
-  allowRoles(ROLES.CUSTOMER),
-  controller.getMyCustomer
+  allowRoles(ROLES.PANCHAYAT),
+  controller.getMyPanchayat
 );
 
 router.put(
   '/me',
   authenticate,
-  allowRoles(ROLES.CUSTOMER),
-  validate(updatecustomerSchema),
+  allowRoles(ROLES.PANCHAYAT),
+  validate(updatePanchayatSchema),
   controller.updateMyCustomer
 );
 
@@ -37,7 +37,7 @@ router.delete(
 router.get(
   '/devicesforcustomer',
   authenticate,
-  allowRoles(ROLES.CUSTOMER),
+  allowRoles(ROLES.PANCHAYAT),
   controller.getMyDevices
 );
 
@@ -45,7 +45,7 @@ router.get(
 router.get(
   '/getallvendorsforcustomer',
   authenticate,
-  allowRoles(ROLES.CUSTOMER),
+  allowRoles(ROLES.PANCHAYAT),
   controller.getMyVendorsForCustomer
 );
 module.exports = router;

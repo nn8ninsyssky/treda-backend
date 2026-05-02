@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-exports.updatecustomerSchema = Joi.object({
+exports.updatePanchayatSchema = Joi.object({
   customer_name: Joi.string().optional(),
   customer_phone: Joi.string().optional(),
   customer_alt_phone: Joi.string().optional(),

@@ -6,7 +6,7 @@ const ROLES = {
   TREDA_OFFICER: 'treda_officer',
   VENDOR:        'vendor',
   TECHNICIAN:    'technician',
-  CUSTOMER:      'customer',
+  PANCHAYAT:      'panchayat',
 };
 
 /**

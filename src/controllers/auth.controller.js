@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const logger = require('../utils/logger');
-const { User, Customer,Vendor,sequelize } = require('../models/pg');
 const { callSP } = require('../config/db.postgres');
 const crypto = require('crypto');
 const { sendEmail } = require('../services/email.service');

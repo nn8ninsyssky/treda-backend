@@ -1,14 +1,14 @@
 
 const { callSP } = require('../config/db.postgres');
 
-exports.getMyCustomer = async (req, res, next) => {
+exports.getMyPanchayat = async (req, res, next) => {
   try {
     const result = await callSP(
-      `SELECT sp_get_customer_by_user_id(:user_id)`,
+      `SELECT sp_get_panchayat_by_user_id(:user_id)`,
       { user_id: req.user.id }
     );
 
-    res.json(result[0].sp_get_customer_by_user_id);
+    res.json(result[0].sp_get_panchayat_by_user_id);
 
   } catch (err) {
     next(err);

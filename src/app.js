@@ -13,7 +13,7 @@ const logger          = require('./utils/logger');
 // ── Routes ────────────────────────────────────────────
 const authRoutes       = require('./routes/auth.routes');
 const vendorRoutes     = require('./routes/vendor.routes');
-const customerRoutes   = require('./routes/customer.routes');
+const panchayatRoutes   = require('./routes/panchayat.routes');
 const deviceRoutes     = require('./routes/device.routes');
 const technicianRoutes = require('./routes/technician.routes');
 const enquiryRoutes    = require('./routes/enquiry.routes');
@@ -85,7 +85,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 
 app.use('/api/vendors',     vendorRoutes);
-app.use('/api/customers',   customerRoutes);
+app.use('/api/panchayats',   panchayatRoutes);
 app.use('/api/devices',     deviceRoutes);
 app.use('/api/technicians', technicianRoutes);
 app.use('/api/enquiries',   enquiryRoutes);
@@ -110,7 +110,6 @@ const startServer = async () => {
     await connectPostgres();
     await connectMongo();
 
-    require('./models/pg'); // registers all models + associations
 //await sequelize.sync();
     // app.listen(PORT, () => {
     //   logger.info(`TREDA server running on port ${PORT} [${process.env.NODE_ENV}]`);
