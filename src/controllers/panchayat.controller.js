@@ -15,10 +15,10 @@ exports.getMyPanchayat = async (req, res, next) => {
   }
 };
 
-exports.updateMyCustomer = async (req, res, next) => {
+exports.updateMyPanchayat = async (req, res, next) => {
   try {
     const result = await callSP(
-      `SELECT sp_update_customer(:user_id, :data)`,
+      `SELECT sp_update_panchayat(:user_id, :data)`,
       {
         user_id: req.user.id,
         data: JSON.stringify(req.body)
@@ -26,7 +26,7 @@ exports.updateMyCustomer = async (req, res, next) => {
       }
     );
 
-    res.json(result[0].sp_update_customer);
+    res.json(result[0].sp_update_panchayat);
 
   } catch (err) {
     next(err);

@@ -23,7 +23,7 @@ router.put(
   authenticate,
   allowRoles(ROLES.PANCHAYAT),
   validate(updatePanchayatSchema),
-  controller.updateMyCustomer
+  controller.updateMyPanchayat
 );
 
 router.delete(
