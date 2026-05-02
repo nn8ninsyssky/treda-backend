@@ -253,7 +253,7 @@ exports.registerPanchayat = async (req, res, next) => {
       }
     );
 
-    const response = result[0].sp_register_customer;
+    const response = result[0].sp_register_panchayat;
 
     if (!response.success) {
       return res.status(400).json(response);
@@ -309,7 +309,7 @@ exports.loginPanchayat = async (req, res, next) => {
       { email, password }
     );
 
-    const response = result[0].sp_login_customer;
+    const response = result[0].sp_login_panchayat;
 
     if (!response.success) {
       return res.status(401).json(response);
