@@ -100,7 +100,7 @@ exports.verifyVendorEmailOtp = async (req, res, next) => {
 //forgot password controller function for all roles...
 exports.forgotPassword = async (req, res, next) => {
   try {
-    const { email } = req.body;
+    const { email,page } = req.body;
 
     if (!email) {
       return res.status(400).json({
@@ -125,7 +125,7 @@ exports.forgotPassword = async (req, res, next) => {
     }
 
     // 🔥 Create reset link
-    const resetLink = `https://unstable-follow-quarrel.ngrok-free.dev/reset-password?email=${email}&token=${token}`;
+    const resetLink = `https://unstable-follow-quarrel.ngrok-free.dev/reset-password?email=${email}&token=${token}&page=${page}`;
 
     // Send email
     await sendEmail({
