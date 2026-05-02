@@ -7,8 +7,8 @@ const validate = require('../middlewares/validate');
 const { allowRoles, ROLES } = require('../middlewares/roleCheck');
 
 const {
-  registerCustomerSchema,
-  loginCustomerSchema,
+  registerPanchayatSchema,
+  loginPanchayatSchema,
   registerVendorSchema,
   loginVendorSchema,
   registerTechnicianSchema,
