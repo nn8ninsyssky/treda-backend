@@ -124,7 +124,7 @@ exports.forgotPassword = async (req, res, next) => {
       return res.status(400).json(response);
     }
 
-    // 🔥 Create reset link
+    //  Create reset link
     const resetLink = `https://unstable-follow-quarrel.ngrok-free.dev/reset-password?email=${email}&token=${token}&page=${page}`;
 
     // Send email
@@ -227,9 +227,9 @@ Thank you.
 };
 
 
-// Customer Registration //
+// Panchayat Registration //
 
-exports.registerCustomer = async (req, res, next) => {
+exports.registerPanchayat = async (req, res, next) => {
   try {
     const {
       name, email, password,
@@ -239,7 +239,7 @@ exports.registerCustomer = async (req, res, next) => {
     } = req.body;
 
     const result = await callSP(
-      `SELECT sp_register_customer(
+      `SELECT sp_register_panchayat(
         :name, :email, :password,
         :phone, :alt_phone, :aadhaar,
         :village, :block, :district, :state, :country,
@@ -266,7 +266,7 @@ exports.registerCustomer = async (req, res, next) => {
     try {
       await sendEmail({
         to: email,
-        subject: "Customer Registration Successful",
+        subject: "Panchayat Registration Successful",
         text: `
 Hello ${name},
 
@@ -300,12 +300,12 @@ Thank you.
  * Customer LOGIN
  */
 
-exports.loginCustomer = async (req, res, next) => {
+exports.loginPanchayat = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     const result = await callSP(
-      `SELECT sp_login_customer(:email, :password)`,
+      `SELECT sp_login_panchayat(:email, :password)`,
       { email, password }
     );
 

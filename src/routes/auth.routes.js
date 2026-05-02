@@ -27,20 +27,20 @@ router.post(
   controller.changePassword
 );
 
-// REGISTER Customer
+// REGISTER Panchayat
 router.post(
-  '/register/customer',
+  '/register/panchayat',
 
-  validate(registerCustomerSchema),
-  controller.registerCustomer
+  validate(registerPanchayatSchema),
+  controller.registerPanchayat
 );
 
 // LOGIN Customer
 router.post(
-  '/login/customer',
+  '/login/panchayat',
 
-  validate(loginCustomerSchema),
-  controller.loginCustomer
+  validate(loginPanchayatSchema),
+  controller.loginPanchayat
 );
 // REGISTER Vendor
 router.post(

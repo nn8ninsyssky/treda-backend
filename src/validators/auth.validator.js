@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-exports.registerCustomerSchema = Joi.object({
+exports.registerPanchayatSchema = Joi.object({
   name: Joi.string().required(),
 
   email: Joi.string().email().required(),
@@ -26,7 +26,7 @@ exports.registerCustomerSchema = Joi.object({
 
 });
 
-exports.loginCustomerSchema = Joi.object({
+exports.loginPanchayatSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
