@@ -51,11 +51,11 @@ router.get(
   controller.getAllVendorsForAdmin
 );
 
-// Fetch al Technicians for admin
-router.get("/technicians",
+// Fetch all Technicians for admin
+router.get("/getAllTechniciansForAdmin",
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
-  controller.getAllTechnicians
+  controller.getAllTechniciansForAdmin
 )
 
 // Fetch All Registered Customer Details
