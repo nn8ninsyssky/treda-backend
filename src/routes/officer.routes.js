@@ -61,10 +61,10 @@ router.get("/technicians",
 // Fetch All Registered Customer Details
 
 router.get(
-  "/getallcustomersforadmin",
+  "/getAllPanchayatsForAdmin",
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
-  controller.getAllCustomersForAdmin
+  controller.getAllPanchayatsForAdmin
 );
 
 
