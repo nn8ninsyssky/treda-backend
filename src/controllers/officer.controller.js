@@ -593,7 +593,6 @@ exports.getAllTechniciansForAdmin = async (req, res, next) => {
   }
 };
 //Fetch all devices for Admin
-const { callSP } = require('../utils/callSP');
 
 exports.getAllDevicesForAdmin = async (req, res, next) => {
   try {
