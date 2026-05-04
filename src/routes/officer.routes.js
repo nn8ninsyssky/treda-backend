@@ -70,9 +70,9 @@ router.get(
 
 // Fetch all Deices for Admin
 router.get(
-  "/getalldevicesforadmin",
+  "/getAllDevicesForAdmin",
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
-  controller.getAllDevicesforAdmin
+  controller.getAllDevicesForAdmin
 );
 module.exports = router;
