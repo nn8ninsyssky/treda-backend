@@ -88,25 +88,166 @@ exports.updateMyVendorByAdmin = async (req, res, next) => {
 };
 
 // Fetch All Vendor Details for Admin
-exports.getAllVendors = async (req, res, next) => {
+
+exports.getAllVendorsForAdmin = async (req, res, next) => {
   try {
+    const {
+      page = 1,
+      limit = 10,
+      year,
+      month,
+      district,
+      state,
+      latitude,
+      longitude,
+      radius_km = 10,
+    } = req.query;
 
-    const result = await callSP(
-      `SELECT sp_get_all_vendors_for_admin()`
-    );
+    const parsedPage = Number(page);
+    const parsedLimit = Number(limit);
 
-    const response = result[0].sp_get_all_vendors_for_admin;
+    const parsedYear =
+      year === undefined || year === '' || year === 'All'
+        ? null
+        : Number(year);
 
-    // Handle unexpected null
-    if (!response) {
-      return res.status(500).json({
+    const parsedMonth =
+      month === undefined || month === '' || month === 'All'
+        ? null
+        : Number(month);
+
+    const parsedDistrict =
+      district === undefined || district === '' || district === 'All'
+        ? null
+        : district;
+
+    const parsedState =
+      state === undefined || state === '' || state === 'All'
+        ? null
+        : state;
+
+    const parsedLatitude =
+      latitude === undefined || latitude === ''
+        ? null
+        : Number(latitude);
+
+    const parsedLongitude =
+      longitude === undefined || longitude === ''
+        ? null
+        : Number(longitude);
+
+    const parsedRadius =
+      radius_km === undefined || radius_km === ''
+        ? 10
+        : Number(radius_km);
+
+    if (Number.isNaN(parsedPage) || parsedPage < 1) {
+      return res.status(400).json({
         success: false,
-        message: "Failed to fetch vendors"
+        message: 'Invalid page value',
       });
     }
 
-    return res.status(200).json(response);
+    if (Number.isNaN(parsedLimit) || parsedLimit < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid limit value',
+      });
+    }
 
+    if (parsedYear !== null && Number.isNaN(parsedYear)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid year value',
+      });
+    }
+
+    if (parsedMonth !== null && Number.isNaN(parsedMonth)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid month value',
+      });
+    }
+
+    if (parsedMonth !== null && (parsedMonth < 1 || parsedMonth > 12)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Month must be between 1 and 12',
+      });
+    }
+
+    if (parsedMonth !== null && parsedYear === null) {
+      return res.status(400).json({
+        success: false,
+        message: 'Year is required when month is provided',
+      });
+    }
+
+    if (parsedLatitude !== null && Number.isNaN(parsedLatitude)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid latitude value',
+      });
+    }
+
+    if (parsedLongitude !== null && Number.isNaN(parsedLongitude)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid longitude value',
+      });
+    }
+
+    if (
+      (parsedLatitude !== null && parsedLongitude === null) ||
+      (parsedLatitude === null && parsedLongitude !== null)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both latitude and longitude are required for location filter',
+      });
+    }
+
+    if (Number.isNaN(parsedRadius) || parsedRadius <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid radius_km value',
+      });
+    }
+
+    const result = await callSP(
+      `
+      SELECT public.sp_get_all_vendors_for_admin(
+        :page,
+        :limit,
+        :year,
+        :month,
+        :district,
+        :state,
+        :latitude,
+        :longitude,
+        :radius_km
+      ) AS response
+      `,
+      {
+        page: parsedPage,
+        limit: parsedLimit,
+        year: parsedYear,
+        month: parsedMonth,
+        district: parsedDistrict,
+        state: parsedState,
+        latitude: parsedLatitude,
+        longitude: parsedLongitude,
+        radius_km: parsedRadius,
+      }
+    );
+
+    const response = result[0].response;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(200).json(response);
   } catch (err) {
     next(err);
   }

@@ -45,10 +45,10 @@ router.put(
 
 // Fetch All Registered Vendors Details 
 router.get(
-  "/getallvendors",
+  "/getAllVendorsForAdmin",
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
-  controller.getAllVendors
+  controller.getAllVendorsForAdmin
 );
 
 // Fetch al Technicians for admin
