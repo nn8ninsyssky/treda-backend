@@ -27,8 +27,8 @@ router.put(
 
 // get all complaint by admin vendor and technician
 router.get(
-  '/all',
+  '/getAllComplaintsRolewise',
   authenticate,
-  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER,ROLES.VENDOR,ROLES.TECHNICIAN),
-  controller.getAllComplaints
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER,ROLES.VENDOR,ROLES.TECHNICIAN,ROLES.PANCHAYAT),
+  controller.getAllComplaintsRolewise
 );

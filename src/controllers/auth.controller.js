@@ -530,10 +530,31 @@ exports.loginTredaAdmin = async (req, res, next) => {
       { email, password }
     );
 
-    const response = result[0].sp_login_admin;
+    const response = result?.[0]?.sp_login_admin;
+
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "Login failed. No response from database."
+      });
+    }
 
     if (!response.success) {
-      return res.status(401).json(response);
+      let statusCode = 401;
+
+      if (response.message === "Please try with a valid email!") {
+        statusCode = 404;
+      }
+
+      if (response.message === "Please enter a valid password!") {
+        statusCode = 401;
+      }
+
+      if (response.message === "Admin not verified") {
+        statusCode = 403;
+      }
+
+      return res.status(statusCode).json(response);
     }
 
     const tokens = generateTokens({
@@ -542,7 +563,7 @@ exports.loginTredaAdmin = async (req, res, next) => {
       name: response.user.name
     });
 
-    res.json({
+    return res.status(200).json({
       ...response,
       ...tokens
     });
