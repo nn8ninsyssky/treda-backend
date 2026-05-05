@@ -4,26 +4,26 @@ const logger = require('../utils/logger');
 const { callSP } = require('../config/db.postgres');
 const crypto = require('crypto');
 const { sendEmail } = require('../services/email.service');
-
+const { generateTokens } = require('../utils/token.utils');
 
 /**
  * Generate tokens
  */
-const generateTokens = (user) => {
-  const accessToken = jwt.sign(
-    { id: user.id, role: user.role, name: user.name },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
-  );
+// const generateTokens = (user) => {
+//   const accessToken = jwt.sign(
+//     { id: user.id, role: user.role, name: user.name },
+//     process.env.JWT_SECRET,
+//     { expiresIn: process.env.JWT_EXPIRES_IN }
+//   );
 
-  const refreshToken = jwt.sign(
-    { id: user.id },
-    process.env.JWT_REFRESH_SECRET,
-    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
-  );
+//   const refreshToken = jwt.sign(
+//     { id: user.id },
+//     process.env.JWT_REFRESH_SECRET,
+//     { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
+//   );
 
-  return { accessToken, refreshToken };
-};
+//   return { accessToken, refreshToken };
+// };
 
 //Email verification For all registration
 exports.sendVendorEmailOtp = async (req, res, next) => {
@@ -579,25 +579,66 @@ exports.refresh = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
 
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-
-    const user = await User.findByPk(decoded.id); // ✅ FIX
-
-    if (!user) {
+    if (!refreshToken) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid refresh token',
+        code: 'NO_REFRESH_TOKEN',
+        message: 'Refresh token missing.',
       });
     }
 
-    const tokens = generateTokens(user);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    res.json({
+    if (decoded.tokenType !== 'refresh') {
+      return res.status(403).json({
+        success: false,
+        code: 'INVALID_TOKEN_TYPE',
+        message: 'Invalid token type.',
+      });
+    }
+
+    const result = await callSP(
+      `SELECT sp_get_user_for_refresh(:user_id)`,
+      {
+        user_id: decoded.id,
+      }
+    );
+
+    const response = result?.[0]?.sp_get_user_for_refresh;
+
+    if (!response || !response.success) {
+      return res.status(401).json({
+        success: false,
+        code: 'INVALID_REFRESH_TOKEN',
+        message: 'Invalid refresh token.',
+      });
+    }
+
+    const tokens = generateTokens(response.user);
+
+    return res.status(200).json({
       success: true,
+      message: 'Token refreshed successfully.',
       ...tokens,
     });
 
   } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(403).json({
+        success: false,
+        code: 'REFRESH_TOKEN_EXPIRED',
+        message: 'Refresh token expired. Please login again.',
+      });
+    }
+
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(403).json({
+        success: false,
+        code: 'INVALID_REFRESH_TOKEN',
+        message: 'Invalid refresh token.',
+      });
+    }
+
     next(err);
   }
 };

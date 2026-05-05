@@ -21,7 +21,7 @@ router.get(
 router.put(
   '/update-status',
   authenticate,
-  allowRoles(ROLES.TECHNICIAN,ROLES.VENDOR),
+  allowRoles(ROLES.TECHNICIAN,ROLES.VENDOR,ROLES.TREDA_OFFICER,ROLES.ADMIN),
   controller.updateComplaintStatus
 );
 

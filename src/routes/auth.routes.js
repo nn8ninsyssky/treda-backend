@@ -14,16 +14,23 @@ const {
   registerTechnicianSchema,
   loginTechnicianSchema,
   loginTredaOfficerSchema,
-  refreshSchema
+  refreshSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+  changePasswordSchema,
+  emailOtpSchema,
+  verifyOtpSchema,
 } = require('../validators/auth.validator');
+
 // routes that are common for all roles...
-router.post('/vendor-send-otp', controller.sendVendorEmailOtp);
-router.post('/vendor-verify-otp', controller.verifyVendorEmailOtp);
-router.post('/forgot-password', controller.forgotPassword);
-router.post('/reset-password', controller.resetPassword);
+router.post('/vendor-send-otp',validate(emailOtpSchema), controller.sendVendorEmailOtp);
+router.post('/vendor-verify-otp',   validate(verifyOtpSchema), controller.verifyVendorEmailOtp);
+router.post('/forgot-password',  validate(forgotPasswordSchema),  controller.forgotPassword);
+router.post('/reset-password',  validate(resetPasswordSchema), controller.resetPassword);
 router.post(
   '/change-password',
   authenticate, // REQUIRED
+    validate(changePasswordSchema),
   controller.changePassword
 );
 

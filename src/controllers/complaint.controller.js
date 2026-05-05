@@ -240,24 +240,82 @@ exports.getComplaintByDeviceQR = async (req, res, next) => {
 };
 
 //update complaint status by vendor or technician
+
+
+// exports.updateComplaintStatus = async (req, res, next) => {
+//   try {
+//     const { complaint_id, complaint_status } = req.body;
+
+//     const result = await callSP(
+//       `SELECT sp_update_complaint_status(
+//         :user_id,
+//         :complaint_id,
+//         :complaint_status
+//       )`,
+//       {
+//         user_id: req.user.id,
+//         complaint_id,
+//         complaint_status
+//       }
+//     );
+
+//     const response = result?.[0]?.sp_update_complaint_status;
+
+//     if (!response.success) {
+//       return res.status(400).json(response);
+//     }
+
+//     return res.status(200).json(response);
+
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+
 exports.updateComplaintStatus = async (req, res, next) => {
   try {
-    const { complaint_id, complaint_status } = req.body;
+    const {
+      complaint_no,
+      complaint_status = null,
+      vendor_assignment_status = null,
+      technician_assignment_status = null,
+    } = req.body;
+
+    if (!complaint_no) {
+      return res.status(400).json({
+        success: false,
+        message: "complaint_no is required",
+      });
+    }
 
     const result = await callSP(
-      `SELECT sp_update_complaint_status(
+      `
+      SELECT public.sp_update_complaint_status(
         :user_id,
-        :complaint_id,
-        :complaint_status
-      )`,
+        :complaint_no,
+        :complaint_status,
+        :vendor_assignment_status,
+        :technician_assignment_status
+      )
+      `,
       {
         user_id: req.user.id,
-        complaint_id,
-        complaint_status
+        complaint_no,
+        complaint_status,
+        vendor_assignment_status,
+        technician_assignment_status,
       }
     );
 
     const response = result?.[0]?.sp_update_complaint_status;
+
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update complaint status",
+      });
+    }
 
     if (!response.success) {
       return res.status(400).json(response);
@@ -269,7 +327,6 @@ exports.updateComplaintStatus = async (req, res, next) => {
     next(err);
   }
 };
-
 // get all complaint by admin vendor and technician
 
 exports.getAllComplaintsRolewise = async (req, res, next) => {

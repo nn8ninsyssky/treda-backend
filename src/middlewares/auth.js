@@ -5,15 +5,17 @@ module.exports = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       logger.warn(`No token provided — IP: ${req.ip}`);
+
       return res.status(401).json({
         success: false,
-        message: "Access denied. No token provided.",
+        code: 'NO_TOKEN',
+        message: 'Access denied. No token provided.',
       });
     }
 
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(' ')[1];
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -21,23 +23,27 @@ module.exports = (req, res, next) => {
       id: decoded.id,
       role: decoded.role,
       name: decoded.name,
+      email: decoded.email,
     };
 
     next();
-
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
-      logger.warn(`Expired token — IP: ${req.ip}`);
+      logger.warn(`Expired access token — IP: ${req.ip}`);
+
       return res.status(401).json({
         success: false,
-        message: 'Session expired. Please log in again.',
+        code: 'ACCESS_TOKEN_EXPIRED',
+        message: 'Access token expired.',
       });
     }
 
     if (err.name === 'JsonWebTokenError') {
       logger.warn(`Invalid token — IP: ${req.ip}`);
+
       return res.status(401).json({
         success: false,
+        code: 'INVALID_TOKEN',
         message: 'Invalid token.',
       });
     }
