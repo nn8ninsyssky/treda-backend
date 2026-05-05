@@ -64,10 +64,10 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 
 // Prevent NoSQL injection patterns in Mongo queries
-app.use(mongoSanitize());
+//app.use(mongoSanitize());
 
 // Prevent HTTP parameter pollution
-app.use(hpp());
+//app.use(hpp());
 
 // Compression
 app.use(compression());
