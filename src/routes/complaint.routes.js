@@ -6,6 +6,7 @@ const authenticate = require('../middlewares/auth');
 const { allowRoles,ROLES } = require('../middlewares/roleCheck');
 
 const validate = require('../middlewares/validate');
+const { updateComplaintStatusSchema } = require('../validators/complaint.validator');
 
 
 router.post(
