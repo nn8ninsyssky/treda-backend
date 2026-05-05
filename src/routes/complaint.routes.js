@@ -15,7 +15,7 @@ router.get(
   //authenticate,
   controller.getComplaintByDeviceQR
 );
-module.exports = router;
+
 
 //update complaint status by vendor or technician
 router.put(
@@ -32,3 +32,10 @@ router.get(
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER,ROLES.VENDOR,ROLES.TECHNICIAN,ROLES.PANCHAYAT),
   controller.getAllComplaintsRolewise
 );
+
+
+
+
+
+
+module.exports = router;

@@ -9,34 +9,35 @@ const { sendEmail } = require('../services/email.service');
 
 exports.registerComplaint = async (req, res, next) => {
   try {
+        const user_id = req.user?.id || null;
+
     const {
       device_qr_id,
-      vendor_id,
-      complaint_type,
-      complaint_priority,
-      complaint_status,
-      complaint_description,
-      complaint_resolution_notes,
-      complaint_visit_notes
+      assigned_vendor_code = null,
+      complaint_type = null,
+      complaint_priority = null,
+      complaint_status = "open",
     } = req.body;
 
     // 1. PostgreSQL insert
     const result = await callSP(
-      `SELECT sp_register_complaint(
+      `
+      SELECT public.sp_register_complaint(
         :user_id,
         :device_qr_id,
-        :vendor_id,
+        :assigned_vendor_code,
         :complaint_type,
         :complaint_priority,
         :complaint_status
-      )`,
+      )
+      `,
       {
-        user_id: req.user ? req.user.id : null,
+        user_id,
         device_qr_id,
-        vendor_id,
+        assigned_vendor_code,
         complaint_type,
         complaint_priority,
-        complaint_status
+        complaint_status,
       }
     );
 
@@ -157,6 +158,7 @@ try {
     next(err);
   }
 };
+
 exports.getComplaintByDeviceQR = async (req, res, next) => {
   try {
     const { device_qr_id } = req.params;
@@ -168,6 +170,7 @@ exports.getComplaintByDeviceQR = async (req, res, next) => {
       });
     }
 
+    // 1. Fetch main complaint details from PostgreSQL
     const result = await callSP(
       `SELECT sp_get_complaint_by_device_qr(:device_qr_id)`,
       { device_qr_id }
@@ -186,7 +189,50 @@ exports.getComplaintByDeviceQR = async (req, res, next) => {
       return res.status(404).json(response);
     }
 
-    res.status(200).json(response);
+    const complaintNo = response?.data?.complaint_no;
+
+    // 2. Fetch extra complaint details from MongoDB
+    let mongoComplaintDetails = null;
+
+    if (complaintNo) {
+      const db = getDb();
+
+      mongoComplaintDetails = await db
+        .collection("complaints")
+        .findOne(
+          { complaint_no: complaintNo },
+          {
+            projection: {
+              _id: 1,
+              complaint_no: 1,
+              complaint_description: 1,
+              complaint_resolution_notes: 1,
+              complaint_visit_notes: 1,
+              created_at: 1,
+              updated_at: 1
+            }
+          }
+        );
+    }
+
+    // 3. Attach MongoDB details to PostgreSQL response
+    return res.status(200).json({
+      ...response,
+      data: {
+        ...response.data,
+        mongo_details: mongoComplaintDetails
+          ? {
+              id: mongoComplaintDetails._id,
+              complaint_no: mongoComplaintDetails.complaint_no,
+              complaint_description: mongoComplaintDetails.complaint_description,
+              complaint_resolution_notes: mongoComplaintDetails.complaint_resolution_notes,
+              complaint_visit_notes: mongoComplaintDetails.complaint_visit_notes,
+              created_at: mongoComplaintDetails.created_at,
+              updated_at: mongoComplaintDetails.updated_at || null
+            }
+          : null
+      }
+    });
 
   } catch (err) {
     next(err);

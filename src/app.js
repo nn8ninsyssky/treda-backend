@@ -115,7 +115,7 @@ const startServer = async () => {
     //   logger.info(`TREDA server running on port ${PORT} [${process.env.NODE_ENV}]`);
     // });
     app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on https://treda-backend-87yc.onrender.com:${PORT}`);
+  console.log(`Server running on https://treda-backend-87yc.onrender.com:${PORT}`);
 });
   } catch (err) {
     logger.error('Failed to start server:', err);
