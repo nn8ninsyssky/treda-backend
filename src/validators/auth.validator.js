@@ -11,12 +11,12 @@ exports.verifyOtpSchema = Joi.object({
 
 exports.forgotPasswordSchema = Joi.object({
   email: Joi.string().email().required(),
-  page: Joi.string().optional(),
+  
 });
 
 exports.resetPasswordSchema = Joi.object({
   email: Joi.string().email().required(),
-  token: Joi.string().required(),
+  
   new_password: Joi.string().min(6).required(),
 });
 

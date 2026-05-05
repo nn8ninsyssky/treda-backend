@@ -37,15 +37,16 @@ router.post(
 // REGISTER Panchayat
 router.post(
   '/register/panchayat',
+  allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN),
 
   validate(registerPanchayatSchema),
   controller.registerPanchayat
 );
 
-// LOGIN Customer
+// LOGIN Panchayat
 router.post(
   '/login/panchayat',
-
+allowRoles(ROLES.PANCHAYAT),
   validate(loginPanchayatSchema),
   controller.loginPanchayat
 );
