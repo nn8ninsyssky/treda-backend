@@ -37,29 +37,31 @@ app.use(
 );
 
 // CORS
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-  : ['https://unstable-follow-quarrel.ngrok-free.dev'];
+// const allowedOrigins = process.env.ALLOWED_ORIGINS
+//   ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
+//   : ['https://unstable-follow-quarrel.ngrok-free.dev'];
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      // Allow Postman, curl, server-to-server, mobile apps
-      if (!origin) return callback(null, true);
+// app.use(
+//   cors({
+//     origin(origin, callback) {
+//       // Allow Postman, curl, server-to-server, mobile apps
+//       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+//       if (allowedOrigins.includes(origin)) {
+//         return callback(null, true);
+//       }
 
-      return callback(new Error('Not allowed by CORS'));
-    },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
-);
+//       return callback(new Error('Not allowed by CORS'));
+//     },
+//     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+//     allowedHeaders: ['Content-Type', 'Authorization'],
+//     credentials: true,
+//   })
+// );
 
 // Body parsers
+app.use(cors());
+
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
 

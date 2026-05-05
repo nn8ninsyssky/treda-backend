@@ -16,7 +16,8 @@ exports.forgotPasswordSchema = Joi.object({
 
 exports.resetPasswordSchema = Joi.object({
   email: Joi.string().email().required(),
-  
+    token: Joi.string().required(),
+
   new_password: Joi.string().min(6).required(),
 });
 
