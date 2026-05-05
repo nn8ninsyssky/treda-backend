@@ -9,3 +9,7 @@ const updateComplaintStatusSchema = Joi.object({
 
   technician_assignment_status: Joi.string().allow(null, ""),
 });
+
+module.exports = {
+  updateComplaintStatusSchema,
+};
