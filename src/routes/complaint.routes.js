@@ -4,6 +4,10 @@ const router = express.Router();
 const controller = require('../controllers/complaint.controller') ;
 const authenticate = require('../middlewares/auth');
 const { allowRoles,ROLES } = require('../middlewares/roleCheck');
+
+const validate = require('../middlewares/validate');
+
+
 router.post(
   "/complaints",
 //   optionalAuthenticate, // important (not strict auth)
@@ -22,6 +26,7 @@ router.put(
   '/update-status',
   authenticate,
   allowRoles(ROLES.TECHNICIAN,ROLES.VENDOR,ROLES.TREDA_OFFICER,ROLES.ADMIN),
+  validate(updateComplaintStatusSchema),
   controller.updateComplaintStatus
 );
 
