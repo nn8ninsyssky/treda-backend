@@ -4,60 +4,74 @@ const retryMongoInsert = require('../utils/retryMongo');
 
 const { getDb } = require('../config/db.mongo');
 
-exports.insertAiCallLog = async (req, res, next) => {
+const { callSP } = require('../utils/callSP');
+
+exports.insertAICallLog = async (req, res, next) => {
   try {
     const {
-      customer_id,
-      complaint_id,
-      duration,
-      called_at,
-      purpose,
-      status,
-      ai_call_conversation
+      panchayat_code,
+      panchayat_partition_month,
+      complaint_no,
+      ai_call_log_duration_sec,
+      ai_call_log_called_at,
+      ai_call_log_purpose,
+      ai_call_log_status,
     } = req.body;
 
+    if (!panchayat_code || String(panchayat_code).trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'panchayat_code is required',
+      });
+    }
+
+    const payload = {
+      panchayat_code: String(panchayat_code).trim(),
+
+      ...(panchayat_partition_month && {
+        panchayat_partition_month: String(panchayat_partition_month).trim(),
+      }),
+
+      ...(complaint_no && {
+        complaint_no: String(complaint_no).trim(),
+      }),
+
+      ...(ai_call_log_duration_sec !== undefined &&
+        ai_call_log_duration_sec !== null && {
+          ai_call_log_duration_sec: String(ai_call_log_duration_sec).trim(),
+        }),
+
+      ...(ai_call_log_called_at && {
+        ai_call_log_called_at: String(ai_call_log_called_at).trim(),
+      }),
+
+      ...(ai_call_log_purpose && {
+        ai_call_log_purpose: String(ai_call_log_purpose).trim(),
+      }),
+
+      ...(ai_call_log_status && {
+        ai_call_log_status: String(ai_call_log_status).trim(),
+      }),
+    };
+
     const result = await callSP(
-      `SELECT sp_insert_ai_call_log(:data)`,
+      `
+      SELECT public.sp_insert_ai_call_log(
+        :data::jsonb
+      ) AS response
+      `,
       {
-        data: JSON.stringify(
-          {
-            customer_id: customer_id || null,
-            complaint_id: complaint_id || null,
-            duration,
-            called_at,
-            purpose,
-            status
-          }
-        )
+        data: JSON.stringify(payload),
       }
     );
 
-    const response = result?.[0]?.sp_insert_ai_call_log;
+    const response = result[0].response;
 
-    if (!response?.success) {
+    if (!response.success) {
       return res.status(400).json(response);
     }
 
-    // 2. Mongo insert with retry
-    try {
-      const db = getDb();
-
-      await retryMongoInsert(async () => {
-        return db.collection('ai_call_logs').insertOne({
-          call_id: response.call_id,
-          ai_call_conversation: ai_call_conversation || "",
-
-        });
-      });
-
-    } catch (mongoErr) {
-      console.error("Mongo insert failed after retries:", mongoErr.message);
-      // DO NOT fail API
-    }
-
-
     return res.status(201).json(response);
-
   } catch (err) {
     next(err);
   }
@@ -126,31 +140,6 @@ exports.updateAiCallLog = async (req, res, next) => {
 };
 
 // for getting all ai_call_logs details for admin
-
-// exports.getAllAiCallLogs = async (req, res, next) => {
-//   try {
-//     const { limit = 50, offset = 0 } = req.query;
-
-//     const result = await callSP(
-//       `SELECT sp_get_all_ai_call_logs(:limit, :offset)`,
-//       {
-//         limit: Number(limit),
-//         offset: Number(offset)
-//       }
-//     );
-
-//     const response = result?.[0]?.sp_get_all_ai_call_logs;
-
-//     if (!response?.success) {
-//       return res.status(400).json(response);
-//     }
-
-//     return res.status(200).json(response);
-
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 
 exports.getAllAiCallLogs = async (req, res, next) => {
   try {
