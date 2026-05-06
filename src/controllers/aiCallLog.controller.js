@@ -15,38 +15,58 @@ exports.insertAICallLog = async (req, res, next) => {
       ai_call_log_called_at,
       ai_call_log_purpose,
       ai_call_log_status,
-    } = req.body;
+      ai_call_conversation,
+    } = req.body || {};
 
-    
+    const payload = {};
 
-    const payload = {
-      panchayat_code: String(panchayat_code).trim(),
+    if (panchayat_code !== undefined && panchayat_code !== null && String(panchayat_code).trim() !== "") {
+      payload.panchayat_code = String(panchayat_code).trim();
+    }
 
-      ...(panchayat_partition_month && {
-        panchayat_partition_month: String(panchayat_partition_month).trim(),
-      }),
+    if (
+      panchayat_partition_month !== undefined &&
+      panchayat_partition_month !== null &&
+      String(panchayat_partition_month).trim() !== ""
+    ) {
+      payload.panchayat_partition_month = String(panchayat_partition_month).trim();
+    }
 
-      ...(complaint_no && {
-        complaint_no: String(complaint_no).trim(),
-      }),
+    if (complaint_no !== undefined && complaint_no !== null && String(complaint_no).trim() !== "") {
+      payload.complaint_no = String(complaint_no).trim();
+    }
 
-      ...(ai_call_log_duration_sec !== undefined &&
-        ai_call_log_duration_sec !== null && {
-          ai_call_log_duration_sec: String(ai_call_log_duration_sec).trim(),
-        }),
+    if (
+      ai_call_log_duration_sec !== undefined &&
+      ai_call_log_duration_sec !== null &&
+      String(ai_call_log_duration_sec).trim() !== ""
+    ) {
+      payload.ai_call_log_duration_sec = String(ai_call_log_duration_sec).trim();
+    }
 
-      ...(ai_call_log_called_at && {
-        ai_call_log_called_at: String(ai_call_log_called_at).trim(),
-      }),
+    if (
+      ai_call_log_called_at !== undefined &&
+      ai_call_log_called_at !== null &&
+      String(ai_call_log_called_at).trim() !== ""
+    ) {
+      payload.ai_call_log_called_at = String(ai_call_log_called_at).trim();
+    }
 
-      ...(ai_call_log_purpose && {
-        ai_call_log_purpose: String(ai_call_log_purpose).trim(),
-      }),
+    if (
+      ai_call_log_purpose !== undefined &&
+      ai_call_log_purpose !== null &&
+      String(ai_call_log_purpose).trim() !== ""
+    ) {
+      payload.ai_call_log_purpose = String(ai_call_log_purpose).trim();
+    }
 
-      ...(ai_call_log_status && {
-        ai_call_log_status: String(ai_call_log_status).trim(),
-      }),
-    };
+    if (
+      ai_call_log_status !== undefined &&
+      ai_call_log_status !== null &&
+      String(ai_call_log_status).trim() !== ""
+    ) {
+      payload.ai_call_log_status = String(ai_call_log_status).trim();
+    }
 
     const result = await callSP(
       `
@@ -64,21 +84,23 @@ exports.insertAICallLog = async (req, res, next) => {
     if (!response.success) {
       return res.status(400).json(response);
     }
-    // 2. Mongo insert with retry
+
+    /*
+      Mongo insert is optional.
+      Even if Mongo insert fails, PostgreSQL insert response will still be returned.
+    */
     try {
       const db = getDb();
 
       await retryMongoInsert(async () => {
-        return db.collection('ai_call_logs').insertOne({
+        return db.collection("ai_call_logs").insertOne({
           call_id: response.call_id,
           ai_call_conversation: ai_call_conversation || "",
-
+          created_at: new Date(),
         });
       });
-
     } catch (mongoErr) {
       console.error("Mongo insert failed after retries:", mongoErr.message);
-      // DO NOT fail API
     }
 
     return res.status(201).json(response);
