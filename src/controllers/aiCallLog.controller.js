@@ -4,7 +4,6 @@ const retryMongoInsert = require('../utils/retryMongo');
 
 const { getDb } = require('../config/db.mongo');
 
-const { callSP } = require('../utils/callSP');
 
 exports.insertAICallLog = async (req, res, next) => {
   try {
@@ -70,14 +69,29 @@ exports.insertAICallLog = async (req, res, next) => {
     if (!response.success) {
       return res.status(400).json(response);
     }
+    // 2. Mongo insert with retry
+    try {
+      const db = getDb();
+
+      await retryMongoInsert(async () => {
+        return db.collection('ai_call_logs').insertOne({
+          call_id: response.call_id,
+          ai_call_conversation: ai_call_conversation || "",
+
+        });
+      });
+
+    } catch (mongoErr) {
+      console.error("Mongo insert failed after retries:", mongoErr.message);
+      // DO NOT fail API
+    }
 
     return res.status(201).json(response);
   } catch (err) {
     next(err);
   }
 };
-
-// update ai call log details
+// update ai call log details remians to fix
 exports.updateAiCallLog = async (req, res, next) => {
   try {
     const { call_id, ai_call_conversation, ...data } = req.body;
@@ -141,26 +155,22 @@ exports.updateAiCallLog = async (req, res, next) => {
 
 // for getting all ai_call_logs details for admin
 
-exports.getAllAiCallLogs = async (req, res, next) => {
+exports.getAllAiCallLogsAdmin = async (req, res, next) => {
   try {
-    const { limit = 50, offset = 0 } = req.query;
-
-    // 1. Get logs from PostgreSQL
     const result = await callSP(
-      `SELECT sp_get_all_ai_call_logs(:limit, :offset)`,
+      `SELECT public.sp_get_all_ai_call_logs_admin(:admin_user_id, :data) AS response`,
       {
-        limit: Number(limit),
-        offset: Number(offset)
+        admin_user_id: req.user.id, // from JWT after authenticate middleware
+        data: JSON.stringify(req.body || {})
       }
     );
 
-    const response = result?.[0]?.sp_get_all_ai_call_logs;
+    const response = result[0].response;
 
-    if (!response?.success) {
+    if (!response.success) {
       return res.status(400).json(response);
     }
-
-    const logs = response.data || [];
+const logs = response.data || [];
 
     // 2. Get Mongo DB instance
     const db = getDb();
@@ -185,10 +195,7 @@ exports.getAllAiCallLogs = async (req, res, next) => {
       ai_call_conversation: conversationMap[String(log.call_id)] || []
     }));
 
-    return res.status(200).json({
-      success: true,
-      data: finalData
-    });
+    return res.status(200).json(response);
 
   } catch (err) {
     next(err);

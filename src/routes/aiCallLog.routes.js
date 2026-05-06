@@ -19,7 +19,7 @@ router.put(
 router.get('/getallcalllogs',
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
-  controller.getAllAiCallLogs);
+  controller.getAllAiCallLogsAdmin);
 
 module.exports = router;
 
