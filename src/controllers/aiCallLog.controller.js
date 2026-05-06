@@ -17,12 +17,7 @@ exports.insertAICallLog = async (req, res, next) => {
       ai_call_log_status,
     } = req.body;
 
-    if (!panchayat_code || String(panchayat_code).trim() === '') {
-      return res.status(400).json({
-        success: false,
-        message: 'panchayat_code is required',
-      });
-    }
+    
 
     const payload = {
       panchayat_code: String(panchayat_code).trim(),
