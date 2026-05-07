@@ -68,7 +68,7 @@ router.get(
 );
 // update panchayat details by admin
 router.put(
-  '/panchayats/:id/:panchayat_partition_month',
+  '/panchayats/update',
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
   controller.updatePanchayatAdmin
