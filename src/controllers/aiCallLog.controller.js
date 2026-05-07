@@ -187,32 +187,49 @@ exports.getAllAiCallLogsAdmin = async (req, res, next) => {
     if (!response.success) {
       return res.status(400).json(response);
     }
-const logs = response.data || [];
 
-    // 2. Get Mongo DB instance
+    const logs = response.data || [];
+
+    // If no PostgreSQL logs found, return directly
+    if (logs.length === 0) {
+      return res.status(200).json({
+        ...response,
+        data: []
+      });
+    }
+
+    // 1. Get Mongo DB instance
     const db = getDb();
 
-    // 3. Extract all call_ids
+    // 2. Extract all call_ids from PostgreSQL response
     const callIds = logs.map(log => String(log.call_id));
 
-    // 4. Fetch conversations from Mongo
-    const conversations = await db.collection('ai_call_logs')
-      .find({ call_id: { $in: callIds } })
+    // 3. Fetch matching conversations from MongoDB
+    const conversations = await db
+      .collection('ai_call_logs')
+      .find({
+        call_id: { $in: callIds }
+      })
       .toArray();
 
-    // 5. Convert to map for fast lookup
+    // 4. Convert Mongo conversations into map
     const conversationMap = {};
+
     conversations.forEach(doc => {
-      conversationMap[doc.call_id] = doc.ai_call_conversation;
+      conversationMap[String(doc.call_id)] = doc.ai_call_conversation || "";
     });
 
-    // 6. Merge Postgres + Mongo
+    // 5. Merge PostgreSQL logs + Mongo conversation
     const finalData = logs.map(log => ({
       ...log,
-      ai_call_conversation: conversationMap[String(log.call_id)] || []
+      ai_call_conversation: conversationMap[String(log.call_id)] || ""
     }));
 
-    return res.status(200).json(response);
+    // 6. Return merged response
+    return res.status(200).json({
+      ...response,
+      data: finalData
+    });
 
   } catch (err) {
     next(err);
