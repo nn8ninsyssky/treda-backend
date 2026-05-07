@@ -46,7 +46,6 @@ router.post(
 // LOGIN Panchayat
 router.post(
   '/login/panchayat',
-allowRoles(ROLES.PANCHAYAT),
   validate(loginPanchayatSchema),
   controller.loginPanchayat
 );
