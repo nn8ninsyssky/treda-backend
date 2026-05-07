@@ -423,9 +423,10 @@ exports.getAllPanchayatsForAdmin = async (req, res, next) => {
 // update panchayat details from admin
 exports.updatePanchayatAdmin = async (req, res, next) => {
   try {
-    const { id, panchayat_partition_month } = req.params;
-
     const {
+      panchayat_code,
+      panchayat_partition_month,
+
       panchayat_name,
       panchayat_phone,
       panchayat_alt_phone,
@@ -441,6 +442,18 @@ exports.updatePanchayatAdmin = async (req, res, next) => {
     } = req.body || {};
 
     const payload = {};
+
+    if (panchayat_code !== undefined && panchayat_code !== null && String(panchayat_code).trim() !== "") {
+      payload.panchayat_code = String(panchayat_code).trim();
+    }
+
+    if (
+      panchayat_partition_month !== undefined &&
+      panchayat_partition_month !== null &&
+      String(panchayat_partition_month).trim() !== ""
+    ) {
+      payload.panchayat_partition_month = String(panchayat_partition_month).trim();
+    }
 
     if (panchayat_name !== undefined && panchayat_name !== null && String(panchayat_name).trim() !== "") {
       payload.panchayat_name = String(panchayat_name).trim();
@@ -494,15 +507,11 @@ exports.updatePanchayatAdmin = async (req, res, next) => {
       `
       SELECT public.sp_update_panchayat_admin(
         :admin_user_id,
-        :panchayat_id,
-        :panchayat_partition_month,
         :data::jsonb
       ) AS response
       `,
       {
         admin_user_id: req.user.id,
-        panchayat_id: id,
-        panchayat_partition_month,
         data: JSON.stringify(payload),
       }
     );
