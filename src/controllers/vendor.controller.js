@@ -90,19 +90,115 @@ exports.updateMyTechnicianByVendor = async (req, res, next) => {
 
 exports.getMyTechnicians = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, search = null } = req.query;
+    const {
+      page,
+      limit,
+      all,
+      year,
+      month,
+      technician_name,
+      technician_latitude,
+      technician_longitude,
+      technician_specialization,
+      technician_status,
+      technician_code,
+      technician_phone,
+    } = req.body || {};
+
+    const payload = {};
+
+    if (page !== undefined && page !== null && String(page).trim() !== "") {
+      payload.page = Number(page);
+    }
+
+    if (limit !== undefined && limit !== null && String(limit).trim() !== "") {
+      payload.limit = Number(limit);
+    }
+
+    if (all !== undefined && all !== null && String(all).trim() !== "") {
+      payload.all = String(all).trim();
+    }
+
+    if (year !== undefined && year !== null && String(year).trim() !== "") {
+      payload.year = Number(year);
+    }
+
+    if (month !== undefined && month !== null && String(month).trim() !== "") {
+      payload.month = Number(month);
+    }
+
+    if (technician_name !== undefined && technician_name !== null && String(technician_name).trim() !== "") {
+      payload.technician_name = String(technician_name).trim();
+    }
+
+    if (
+      technician_latitude !== undefined &&
+      technician_latitude !== null &&
+      String(technician_latitude).trim() !== ""
+    ) {
+      payload.technician_latitude = String(technician_latitude).trim();
+    }
+
+    if (
+      technician_longitude !== undefined &&
+      technician_longitude !== null &&
+      String(technician_longitude).trim() !== ""
+    ) {
+      payload.technician_longitude = String(technician_longitude).trim();
+    }
+
+    if (
+      technician_specialization !== undefined &&
+      technician_specialization !== null &&
+      String(technician_specialization).trim() !== ""
+    ) {
+      payload.technician_specialization = String(technician_specialization).trim();
+    }
+
+    if (
+      technician_status !== undefined &&
+      technician_status !== null &&
+      String(technician_status).trim() !== ""
+    ) {
+      payload.technician_status = String(technician_status).trim();
+    }
+
+    if (
+      technician_code !== undefined &&
+      technician_code !== null &&
+      String(technician_code).trim() !== ""
+    ) {
+      payload.technician_code = String(technician_code).trim();
+    }
+
+    if (
+      technician_phone !== undefined &&
+      technician_phone !== null &&
+      String(technician_phone).trim() !== ""
+    ) {
+      payload.technician_phone = String(technician_phone).trim();
+    }
 
     const result = await callSP(
-      `SELECT sp_get_technicians_by_vendor(:user_id, :page, :limit, :search)`,
+      `
+      SELECT public.sp_get_technicians_by_vendor(
+        :vendor_user_id,
+        :data::jsonb
+      ) AS response
+      `,
       {
-        user_id: req.user.id,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        search
+        vendor_user_id: req.user.id,
+        data: JSON.stringify(payload),
       }
     );
 
-    res.json(result[0].sp_get_technicians_by_vendor);
+    const response = result[0].response;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(200).json(response);
 
   } catch (err) {
     next(err);
@@ -112,23 +208,104 @@ exports.getMyTechnicians = async (req, res, next) => {
 // For getting all devices under logged in vendor
 exports.getAllDevicesForVendor = async (req, res, next) => {
   try {
+    const {
+      page,
+      limit,
+      all,
+      year,
+      month,
+      device_name,
+      device_latitude,
+      device_longitude,
+      device_location,
+      device_category,
+      device_qr_id,
+      panchayat_code,
+      vendor_code
+    } = req.body || {};
+
+    const payload = {};
+
+    if (page !== undefined && page !== null && String(page).trim() !== "") {
+      payload.page = Number(page);
+    }
+
+    if (limit !== undefined && limit !== null && String(limit).trim() !== "") {
+      payload.limit = Number(limit);
+    }
+
+    if (all !== undefined && all !== null && String(all).trim() !== "") {
+      payload.all = String(all).trim();
+    }
+
+    if (year !== undefined && year !== null && String(year).trim() !== "") {
+      payload.year = Number(year);
+    }
+
+    if (month !== undefined && month !== null && String(month).trim() !== "") {
+      payload.month = Number(month);
+    }
+
+    if (device_name !== undefined && device_name !== null && String(device_name).trim() !== "") {
+      payload.device_name = String(device_name).trim();
+    }
+
+    if (
+      device_latitude !== undefined &&
+      device_latitude !== null &&
+      String(device_latitude).trim() !== ""
+    ) {
+      payload.device_latitude = String(device_latitude).trim();
+    }
+
+    if (
+      device_longitude !== undefined &&
+      device_longitude !== null &&
+      String(device_longitude).trim() !== ""
+    ) {
+      payload.device_longitude = String(device_longitude).trim();
+    }
+
+    if (device_location !== undefined && device_location !== null && String(device_location).trim() !== "") {
+      payload.device_location = String(device_location).trim();
+    }
+
+    if (device_category !== undefined && device_category !== null && String(device_category).trim() !== "") {
+      payload.device_category = String(device_category).trim();
+    }
+
+    if (device_qr_id !== undefined && device_qr_id !== null && String(device_qr_id).trim() !== "") {
+      payload.device_qr_id = String(device_qr_id).trim();
+    }
+
+    if (panchayat_code !== undefined && panchayat_code !== null && String(panchayat_code).trim() !== "") {
+      payload.panchayat_code = String(panchayat_code).trim();
+    }
+
+    if (vendor_code !== undefined && vendor_code !== null && String(vendor_code).trim() !== "") {
+      payload.vendor_code = String(vendor_code).trim();
+    }
+
     const result = await callSP(
-      `SELECT sp_get_devices_by_vendor(:user_id)`,
+      `
+      SELECT public.sp_get_devices_by_vendor(
+        :vendor_user_id,
+        :data::jsonb
+      ) AS response
+      `,
       {
-        user_id: req.user.id
+        vendor_user_id: req.user.id,
+        data: JSON.stringify(payload),
       }
     );
 
-    const response = result?.[0]?.sp_get_devices_by_vendor;
+    const response = result[0].response;
 
-    if (!response) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to fetch devices"
-      });
+    if (!response.success) {
+      return res.status(400).json(response);
     }
 
-    res.status(200).json(response);
+    return res.status(200).json(response);
 
   } catch (err) {
     next(err);
