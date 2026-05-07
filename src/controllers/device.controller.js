@@ -2,15 +2,86 @@ const { callSP } = require('../config/db.postgres');
 
 exports.registerDevice = async (req, res, next) => {
   try {
+    const {
+      device_name,
+      device_location,
+      device_longitude,
+      device_latitude,
+      device_category,
+      device_qr_id,
+      device_partition_month,
+      panchayat_code,
+      panchayat_partition_month
+    } = req.body || {};
+
+    const payload = {};
+
+    if (device_name !== undefined && device_name !== null && String(device_name).trim() !== "") {
+      payload.device_name = String(device_name).trim();
+    }
+
+    if (device_location !== undefined && device_location !== null && String(device_location).trim() !== "") {
+      payload.device_location = String(device_location).trim();
+    }
+
+    if (
+      device_longitude !== undefined &&
+      device_longitude !== null &&
+      String(device_longitude).trim() !== ""
+    ) {
+      payload.device_longitude = String(device_longitude).trim();
+    }
+
+    if (
+      device_latitude !== undefined &&
+      device_latitude !== null &&
+      String(device_latitude).trim() !== ""
+    ) {
+      payload.device_latitude = String(device_latitude).trim();
+    }
+
+    if (device_category !== undefined && device_category !== null && String(device_category).trim() !== "") {
+      payload.device_category = String(device_category).trim();
+    }
+
+    if (device_qr_id !== undefined && device_qr_id !== null && String(device_qr_id).trim() !== "") {
+      payload.device_qr_id = String(device_qr_id).trim();
+    }
+
+    if (
+      device_partition_month !== undefined &&
+      device_partition_month !== null &&
+      String(device_partition_month).trim() !== ""
+    ) {
+      payload.device_partition_month = String(device_partition_month).trim();
+    }
+
+    if (panchayat_code !== undefined && panchayat_code !== null && String(panchayat_code).trim() !== "") {
+      payload.panchayat_code = String(panchayat_code).trim();
+    }
+
+    if (
+      panchayat_partition_month !== undefined &&
+      panchayat_partition_month !== null &&
+      String(panchayat_partition_month).trim() !== ""
+    ) {
+      payload.panchayat_partition_month = String(panchayat_partition_month).trim();
+    }
+
     const result = await callSP(
-      `SELECT sp_register_device(:user_id, :data)`,
+      `
+      SELECT public.sp_register_device(
+        :user_id,
+        :data::jsonb
+      ) AS response
+      `,
       {
-        user_id: req.user.id, 
-        data: JSON.stringify(req.body)
+        user_id: req.user.id,
+        data: JSON.stringify(payload)
       }
     );
 
-    const response = result[0].sp_register_device;
+    const response = result[0].response;
 
     if (!response.success) {
       return res.status(400).json(response);
