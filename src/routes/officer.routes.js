@@ -58,7 +58,7 @@ router.get("/getAllTechniciansForAdmin",
   controller.getAllTechniciansForAdmin
 )
 
-// Fetch All Registered Customer Details
+// Fetch All Registered Panchayat Details
 
 router.get(
   "/getAllPanchayatsForAdmin",
@@ -66,7 +66,13 @@ router.get(
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
   controller.getAllPanchayatsForAdmin
 );
-
+// update panchayat details by admin
+router.put(
+  '/panchayats/:id/:panchayat_partition_month',
+  authenticate,
+  allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
+  controller.updatePanchayatAdmin
+);
 
 // Fetch all Deices for Admin
 router.get(
