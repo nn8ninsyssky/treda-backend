@@ -126,6 +126,6 @@ exports.loginTredaOfficerSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
-module.exports = {
-  emailOtpSchema,verifyOtpSchema,forgotPasswordSchema,changePasswordSchema,resetPasswordSchema,refreshSchema,registerPanchayatSchema,loginPanchayatSchema,registerVendorSchema,loginVendorSchema,registerTechnicianSchema,loginTechnicianSchema,loginTredaOfficerSchema
-};
+// module.exports = {
+//   emailOtpSchema,verifyOtpSchema,forgotPasswordSchema,changePasswordSchema,resetPasswordSchema,refreshSchema,registerPanchayatSchema,loginPanchayatSchema,registerVendorSchema,loginVendorSchema,registerTechnicianSchema,loginTechnicianSchema,loginTredaOfficerSchema
+// };
