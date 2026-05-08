@@ -57,28 +57,42 @@ exports.loginPanchayatSchema = Joi.object({
   password: Joi.string().required(),
 });
 
+// exports.registerVendorSchema = Joi.object({
+//   name: Joi.string().required(),
+//   email: Joi.string().email().required(),
+//   password: Joi.string().min(6).required(),
+
+//   // Do not allow customer here.
+//   role: Joi.string().valid('vendor').optional(),
+
+//   contact_person: Joi.string().required(),
+//   vendor_phone: Joi.string().required(),
+
+//   lat: Joi.number().required(),
+//   long: Joi.number().required(),
+
+//   district: Joi.string().optional(),
+//   state: Joi.string().optional(),
+//   country: Joi.string().optional(),
+
+//   company_reg_no: Joi.string().optional(),
+//   vendor_gst_no: Joi.string().optional(),
+// });
 exports.registerVendorSchema = Joi.object({
   name: Joi.string().required(),
   email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
-
-  // Do not allow customer here.
-  role: Joi.string().valid('vendor').optional(),
-
-  contact_person: Joi.string().required(),
-  vendor_phone: Joi.string().required(),
-
-  lat: Joi.number().required(),
-  long: Joi.number().required(),
-
-  district: Joi.string().optional(),
-  state: Joi.string().optional(),
-  country: Joi.string().optional(),
-
-  company_reg_no: Joi.string().optional(),
-  vendor_gst_no: Joi.string().optional(),
+  password: Joi.string().required(),
+  vendor_name: Joi.string().required(),
+  company_reg_no: Joi.string().allow(null, ""),
+  vendor_gst_no: Joi.string().allow(null, ""),
+  contact_person: Joi.string().allow(null, ""),
+  vendor_phone: Joi.string().allow(null, ""),
+  district: Joi.string().allow(null, ""),
+  state: Joi.string().allow(null, ""),
+  country: Joi.string().allow(null, ""),
+  lat: Joi.number().allow(null),
+  long: Joi.number().allow(null)
 });
-
 exports.loginVendorSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
@@ -112,3 +126,6 @@ exports.loginTredaOfficerSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
+module.exports = {
+  emailOtpSchema,verifyOtpSchema,forgotPasswordSchema,changePasswordSchema,resetPasswordSchema,refreshSchema,registerPanchayatSchema,loginPanchayatSchema,registerVendorSchema,loginVendorSchema,registerTechnicianSchema,loginTechnicianSchema,loginTredaOfficerSchema
+};

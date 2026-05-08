@@ -23,14 +23,14 @@ const {
 } = require('../validators/auth.validator');
 
 // routes that are common for all roles...
-router.post('/vendor-send-otp',validate(emailOtpSchema), controller.sendVendorEmailOtp);
-router.post('/vendor-verify-otp',   validate(verifyOtpSchema), controller.verifyVendorEmailOtp);
-router.post('/forgot-password',  validate(forgotPasswordSchema),  controller.forgotPassword);
-router.post('/reset-password',  validate(resetPasswordSchema), controller.resetPassword);
+router.post('/vendor-send-otp', validate(emailOtpSchema), controller.sendVendorEmailOtp);
+router.post('/vendor-verify-otp', validate(verifyOtpSchema), controller.verifyVendorEmailOtp);
+router.post('/forgot-password', validate(forgotPasswordSchema), controller.forgotPassword);
+router.post('/reset-password', validate(resetPasswordSchema), controller.resetPassword);
 router.post(
   '/change-password',
   authenticate, // REQUIRED
-    validate(changePasswordSchema),
+  validate(changePasswordSchema),
   controller.changePassword
 );
 
@@ -38,7 +38,7 @@ router.post(
 router.post(
   '/register/panchayat',
   authenticate,
-  allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN),
+  allowRoles(ROLES.TREDA_OFFICER, ROLES.ADMIN),
 
   validate(registerPanchayatSchema),
   controller.registerPanchayat
@@ -53,8 +53,8 @@ router.post(
 // REGISTER Vendor
 router.post(
   '/register/vendor',
-authenticate,
-  allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN),
+  authenticate,
+  allowRoles(ROLES.TREDA_OFFICER, ROLES.ADMIN),
   validate(registerVendorSchema),
   controller.registerVendor
 );
@@ -70,7 +70,7 @@ router.post(
 // register Technician
 router.post(
   '/register/technician',
-authenticate,
+  authenticate,
   allowRoles(ROLES.VENDOR),
   validate(registerTechnicianSchema),
   controller.registerTechnician
@@ -87,7 +87,7 @@ router.post(
 // LOGIN Treda Officer
 router.post(
   '/login/treda/admin',
-//allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN),
+  //allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN),
   validate(loginTredaOfficerSchema),
   controller.loginTredaAdmin
 );
