@@ -373,27 +373,51 @@ exports.loginPanchayat = async (req, res, next) => {
 exports.registerVendor = async (req, res, next) => {
   try {
     const {
-      name, email, password,
-      company_reg_no, vendor_gst_no,
-      contact_person, vendor_phone,
-      district, state, country,
-      lat, long
+      name,
+      email,
+      password,
+      vendor_name,
+      company_reg_no,
+      vendor_gst_no,
+      contact_person,
+      vendor_phone,
+      district,
+      state,
+      country,
+      lat,
+      long
     } = req.body;
 
     const result = await callSP(
-      `SELECT sp_register_vendor(
-        :name, :email, :password,
-        :company_reg_no, :vendor_gst_no,
-        :contact_person, :vendor_phone,
-        :district, :state, :country,
-        :lat, :long
+      `SELECT public.sp_register_vendor(
+        :name,
+        :email,
+        :password,
+        :vendor_name,
+        :company_reg_no,
+        :vendor_gst_no,
+        :contact_person,
+        :vendor_phone,
+        :district,
+        :state,
+        :country,
+        :lat,
+        :long
       )`,
       {
-        name, email, password,
-        company_reg_no, vendor_gst_no,
-        contact_person, vendor_phone,
-        district, state, country,
-        lat, long
+        name,
+        email,
+        password,
+        vendor_name,
+        company_reg_no,
+        vendor_gst_no,
+        contact_person,
+        vendor_phone,
+        district,
+        state,
+        country,
+        lat,
+        long
       }
     );
 
@@ -403,7 +427,6 @@ exports.registerVendor = async (req, res, next) => {
       return res.status(400).json(response);
     }
 
-    // SEND EMAIL AFTER SUCCESS
     try {
       await sendEmail({
         to: email,
@@ -424,7 +447,6 @@ Thank you.
       });
     } catch (mailErr) {
       console.error("Email sending failed:", mailErr.message);
-      // ❗ Don't fail API because of email issue
     }
 
     return res.status(201).json(response);
