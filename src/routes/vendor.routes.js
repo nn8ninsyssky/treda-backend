@@ -68,7 +68,7 @@ router.put(
 // Fetch All Registered Panchayat Details
 
 router.get(
-  "/getAllPanchayatsForAdmin",
+  "/getAllPanchayatsForVendor",
   authenticate,
   allowRoles(ROLES.VENDOR),
   controller.getAllPanchayatsForAdmin
