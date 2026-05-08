@@ -231,37 +231,82 @@ Thank you.
 exports.registerPanchayat = async (req, res, next) => {
   try {
     const {
-      name, email, password,
-      phone, alt_phone, aadhaar,
-      village, block, district, state, country,
-      latitude, longitude, pincode
-    } = req.body;
+      name,
+      email,
+      password,
+      phone,
+      alt_phone,
+      village,
+      block,
+      district,
+      state,
+      country,
+      latitude,
+      longitude,
+      pincode,
+    } = req.body || {};
 
     const result = await callSP(
-      `SELECT sp_register_panchayat(
-        :name, :email, :password,
-        :phone, :alt_phone, :aadhaar,
-        :village, :block, :district, :state, :country,
-        :latitude, :longitude, :pincode
-      )`,
+      `
+      SELECT public.sp_register_panchayat(
+        :admin_user_id,
+        :name,
+        :email,
+        :password,
+        :phone,
+        :alt_phone,
+        :village,
+        :block,
+        :district,
+        :state,
+        :country,
+        :latitude,
+        :longitude,
+        :pincode
+      ) AS response
+      `,
       {
-        name, email, password,
-        phone, alt_phone, aadhaar,
-        village, block, district, state, country,
-        latitude, longitude, pincode
+        admin_user_id: req.user.id,
+
+        name: name ? String(name).trim() : null,
+        email: email ? String(email).trim().toLowerCase() : null,
+        password: password ? String(password) : null,
+
+        phone: phone ? String(phone).trim() : null,
+        alt_phone: alt_phone ? String(alt_phone).trim() : null,
+
+        village: village ? String(village).trim() : null,
+        block: block ? String(block).trim() : null,
+        district: district ? String(district).trim() : null,
+        state: state ? String(state).trim() : null,
+        country: country ? String(country).trim() : null,
+
+        latitude:
+          latitude !== undefined && latitude !== null && String(latitude).trim() !== ""
+            ? Number(latitude)
+            : null,
+
+        longitude:
+          longitude !== undefined && longitude !== null && String(longitude).trim() !== ""
+            ? Number(longitude)
+            : null,
+
+        pincode: pincode ? String(pincode).trim() : null,
       }
     );
 
-    const response = result[0].sp_register_panchayat;
+    const response = result[0].response;
 
     if (!response.success) {
       return res.status(400).json(response);
     }
 
-    // Generate JWT
-    const tokens = generateTokens(response);
+    /*
+      Since admin is registering a panchayat, usually you should NOT generate
+      login tokens for the newly created panchayat here.
+      Tokens should be generated only when panchayat logs in.
+    */
 
-    // SEND EMAIL
     try {
       await sendEmail({
         to: email,
@@ -269,7 +314,7 @@ exports.registerPanchayat = async (req, res, next) => {
         text: `
 Hello ${name},
 
-Your account has been successfully created.
+Your Panchayat account has been successfully created.
 
 Login Details:
 Email: ${email}
@@ -278,17 +323,13 @@ Password: ${password}
 Please login and change your password after first login.
 
 Thank you.
-        `
+        `,
       });
     } catch (mailErr) {
       console.error("Email failed:", mailErr.message);
     }
 
-    res.status(201).json({
-      ...response,
-      ...tokens
-    });
-
+    return res.status(201).json(response);
   } catch (err) {
     next(err);
   }
