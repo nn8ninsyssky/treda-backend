@@ -4,11 +4,23 @@ const { callSP } = require('../config/db.postgres');
 exports.getMyPanchayat = async (req, res, next) => {
   try {
     const result = await callSP(
-      `SELECT sp_get_panchayat_by_user_id(:user_id)`,
-      { user_id: req.user.id }
+      `
+      SELECT public.sp_get_panchayat_by_user_id(
+        :user_id
+      ) AS response
+      `,
+      {
+        user_id: req.user.id,
+      }
     );
 
-    res.json(result[0].sp_get_panchayat_by_user_id);
+    const response = result[0].response;
+
+    if (!response.success) {
+      return res.status(404).json(response);
+    }
+
+    return res.status(200).json(response);
 
   } catch (err) {
     next(err);
@@ -17,16 +29,86 @@ exports.getMyPanchayat = async (req, res, next) => {
 
 exports.updateMyPanchayat = async (req, res, next) => {
   try {
+    const {
+      panchayat_name,
+      panchayat_phone,
+      panchayat_alt_phone,
+      panchayat_village,
+      panchayat_block,
+      panchayat_district,
+      panchayat_state,
+      panchayat_country,
+      panchayat_latitude,
+      panchayat_longitude,
+      panchayat_pincode,
+    } = req.body || {};
+
+    const payload = {};
+
+    if (panchayat_name !== undefined && panchayat_name !== null && String(panchayat_name).trim() !== "") {
+      payload.panchayat_name = String(panchayat_name).trim();
+    }
+
+    if (panchayat_phone !== undefined && panchayat_phone !== null && String(panchayat_phone).trim() !== "") {
+      payload.panchayat_phone = String(panchayat_phone).trim();
+    }
+
+    if (panchayat_alt_phone !== undefined && panchayat_alt_phone !== null && String(panchayat_alt_phone).trim() !== "") {
+      payload.panchayat_alt_phone = String(panchayat_alt_phone).trim();
+    }
+
+    if (panchayat_village !== undefined && panchayat_village !== null && String(panchayat_village).trim() !== "") {
+      payload.panchayat_village = String(panchayat_village).trim();
+    }
+
+    if (panchayat_block !== undefined && panchayat_block !== null && String(panchayat_block).trim() !== "") {
+      payload.panchayat_block = String(panchayat_block).trim();
+    }
+
+    if (panchayat_district !== undefined && panchayat_district !== null && String(panchayat_district).trim() !== "") {
+      payload.panchayat_district = String(panchayat_district).trim();
+    }
+
+    if (panchayat_state !== undefined && panchayat_state !== null && String(panchayat_state).trim() !== "") {
+      payload.panchayat_state = String(panchayat_state).trim();
+    }
+
+    if (panchayat_country !== undefined && panchayat_country !== null && String(panchayat_country).trim() !== "") {
+      payload.panchayat_country = String(panchayat_country).trim();
+    }
+
+    if (panchayat_latitude !== undefined && panchayat_latitude !== null && String(panchayat_latitude).trim() !== "") {
+      payload.panchayat_latitude = String(panchayat_latitude).trim();
+    }
+
+    if (panchayat_longitude !== undefined && panchayat_longitude !== null && String(panchayat_longitude).trim() !== "") {
+      payload.panchayat_longitude = String(panchayat_longitude).trim();
+    }
+
+    if (panchayat_pincode !== undefined && panchayat_pincode !== null && String(panchayat_pincode).trim() !== "") {
+      payload.panchayat_pincode = String(panchayat_pincode).trim();
+    }
+
     const result = await callSP(
-      `SELECT sp_update_panchayat(:user_id, :data)`,
+      `
+      SELECT public.sp_update_panchayat(
+        :user_id,
+        :data::jsonb
+      ) AS response
+      `,
       {
         user_id: req.user.id,
-        data: JSON.stringify(req.body)
-        
+        data: JSON.stringify(payload),
       }
     );
 
-    res.json(result[0].sp_update_panchayat);
+    const response = result[0].response;
+
+    if (!response.success) {
+      return res.status(400).json(response);
+    }
+
+    return res.status(200).json(response);
 
   } catch (err) {
     next(err);

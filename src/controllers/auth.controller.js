@@ -244,6 +244,7 @@ exports.registerPanchayat = async (req, res, next) => {
       latitude,
       longitude,
       pincode,
+      vendor_code,
     } = req.body || {};
 
     const result = await callSP(
@@ -262,7 +263,8 @@ exports.registerPanchayat = async (req, res, next) => {
         :country,
         :latitude,
         :longitude,
-        :pincode
+        :pincode,
+        :vendor_code
       ) AS response
       `,
       {
@@ -292,6 +294,13 @@ exports.registerPanchayat = async (req, res, next) => {
             : null,
 
         pincode: pincode ? String(pincode).trim() : null,
+
+        vendor_code:
+          vendor_code !== undefined &&
+          vendor_code !== null &&
+          String(vendor_code).trim() !== ""
+            ? String(vendor_code).trim()
+            : null,
       }
     );
 
@@ -300,12 +309,6 @@ exports.registerPanchayat = async (req, res, next) => {
     if (!response.success) {
       return res.status(400).json(response);
     }
-
-    /*
-      Since admin is registering a panchayat, usually you should NOT generate
-      login tokens for the newly created panchayat here.
-      Tokens should be generated only when panchayat logs in.
-    */
 
     try {
       await sendEmail({
