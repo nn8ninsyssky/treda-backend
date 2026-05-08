@@ -37,6 +37,7 @@ router.post(
 // REGISTER Panchayat
 router.post(
   '/register/panchayat',
+  authenticate,
   allowRoles(ROLES.TREDA_OFFICER,ROLES.ADMIN),
 
   validate(registerPanchayatSchema),
