@@ -533,134 +533,21 @@ exports.updatePanchayatAdmin = async (req, res, next) => {
 exports.getAllTechniciansForAdmin = async (req, res, next) => {
   try {
     const {
-      page = 1,
-      limit = 10,
+      page,
+      limit,
       year,
       month,
       district,
       state,
       latitude,
       longitude,
-      radius_km = 10,
-    } = req.query;
-
-    const parsedPage = Number(page);
-    const parsedLimit = Number(limit);
-
-    const parsedYear =
-      year === undefined || year === '' || year === 'All'
-        ? null
-        : Number(year);
-
-    const parsedMonth =
-      month === undefined || month === '' || month === 'All'
-        ? null
-        : Number(month);
-
-    const parsedDistrict =
-      district === undefined || district === '' || district === 'All'
-        ? null
-        : district;
-
-    const parsedState =
-      state === undefined || state === '' || state === 'All'
-        ? null
-        : state;
-
-    const parsedLatitude =
-      latitude === undefined || latitude === ''
-        ? null
-        : Number(latitude);
-
-    const parsedLongitude =
-      longitude === undefined || longitude === ''
-        ? null
-        : Number(longitude);
-
-    const parsedRadius =
-      radius_km === undefined || radius_km === ''
-        ? 10
-        : Number(radius_km);
-
-    if (Number.isNaN(parsedPage) || parsedPage < 1) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid page value',
-      });
-    }
-
-    if (Number.isNaN(parsedLimit) || parsedLimit < 1) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid limit value',
-      });
-    }
-
-    if (parsedYear !== null && Number.isNaN(parsedYear)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid year value',
-      });
-    }
-
-    if (parsedYear !== null && (parsedYear < 2000 || parsedYear > 2100)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Year must be between 2000 and 2100',
-      });
-    }
-
-    if (parsedMonth !== null && Number.isNaN(parsedMonth)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid month value',
-      });
-    }
-
-    if (parsedMonth !== null && (parsedMonth < 1 || parsedMonth > 12)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Month must be between 1 and 12',
-      });
-    }
-
-    if (parsedMonth !== null && parsedYear === null) {
-      return res.status(400).json({
-        success: false,
-        message: 'Year is required when month is provided',
-      });
-    }
-
-    if (parsedLatitude !== null && Number.isNaN(parsedLatitude)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid latitude value',
-      });
-    }
-
-    if (parsedLongitude !== null && Number.isNaN(parsedLongitude)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid longitude value',
-      });
-    }
-
-    if (
-      (parsedLatitude !== null && parsedLongitude === null) ||
-      (parsedLatitude === null && parsedLongitude !== null)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: 'Both latitude and longitude are required for location filter',
-      });
-    }
-
-    if (Number.isNaN(parsedRadius) || parsedRadius <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid radius_km value',
-      });
-    }
+      radius_km,
+      all,
+      technician_code,
+      technician_status,
+      technician_specialization,
+      vendor_code,
+    } = req.body || {};
 
     const result = await callSP(
       `
@@ -673,19 +560,61 @@ exports.getAllTechniciansForAdmin = async (req, res, next) => {
         :state,
         :latitude,
         :longitude,
-        :radius_km
+        :radius_km,
+        :all,
+        :technician_code,
+        :technician_status,
+        :technician_specialization,
+        :vendor_code
       ) AS response
       `,
       {
-        page: parsedPage,
-        limit: parsedLimit,
-        year: parsedYear,
-        month: parsedMonth,
-        district: parsedDistrict,
-        state: parsedState,
-        latitude: parsedLatitude,
-        longitude: parsedLongitude,
-        radius_km: parsedRadius,
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 10,
+
+        year: year ? Number(year) : null,
+        month: month ? Number(month) : null,
+
+        district: district && String(district).trim() !== ""
+          ? String(district).trim()
+          : null,
+
+        state: state && String(state).trim() !== ""
+          ? String(state).trim()
+          : null,
+
+        latitude: latitude !== undefined && latitude !== null && String(latitude).trim() !== ""
+          ? Number(latitude)
+          : null,
+
+        longitude: longitude !== undefined && longitude !== null && String(longitude).trim() !== ""
+          ? Number(longitude)
+          : null,
+
+        radius_km: radius_km !== undefined && radius_km !== null && String(radius_km).trim() !== ""
+          ? Number(radius_km)
+          : 10,
+
+        all: all && String(all).trim() !== ""
+          ? String(all).trim()
+          : null,
+
+        technician_code: technician_code && String(technician_code).trim() !== ""
+          ? String(technician_code).trim()
+          : null,
+
+        technician_status: technician_status && String(technician_status).trim() !== ""
+          ? String(technician_status).trim()
+          : null,
+
+        technician_specialization:
+          technician_specialization && String(technician_specialization).trim() !== ""
+            ? String(technician_specialization).trim()
+            : null,
+
+        vendor_code: vendor_code && String(vendor_code).trim() !== ""
+          ? String(vendor_code).trim()
+          : null,
       }
     );
 
@@ -696,6 +625,7 @@ exports.getAllTechniciansForAdmin = async (req, res, next) => {
     }
 
     return res.status(200).json(response);
+
   } catch (err) {
     next(err);
   }
