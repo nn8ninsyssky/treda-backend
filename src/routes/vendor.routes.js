@@ -45,7 +45,7 @@ router.put(
 router.get("/technicians",
   authenticate,
   allowRoles(ROLES.VENDOR),
-  controller.getMyTechnicians
+  controller.getTechniciansByVendor
 )
 
 // For getting all devices under logged in vendor
