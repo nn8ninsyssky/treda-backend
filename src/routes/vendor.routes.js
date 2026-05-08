@@ -64,4 +64,13 @@ router.put(
   allowRoles(ROLES.VENDOR),
   controller.updateDeviceByVendor
 );
+
+// Fetch All Registered Panchayat Details
+
+router.get(
+  "/getAllPanchayatsForAdmin",
+  authenticate,
+  allowRoles(ROLES.VENDOR),
+  controller.getAllPanchayatsForAdmin
+);
 module.exports = router;
