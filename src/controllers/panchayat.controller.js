@@ -41,6 +41,7 @@ exports.updateMyPanchayat = async (req, res, next) => {
       panchayat_latitude,
       panchayat_longitude,
       panchayat_pincode,
+      vendor_code,
     } = req.body || {};
 
     const payload = {};
@@ -87,6 +88,10 @@ exports.updateMyPanchayat = async (req, res, next) => {
 
     if (panchayat_pincode !== undefined && panchayat_pincode !== null && String(panchayat_pincode).trim() !== "") {
       payload.panchayat_pincode = String(panchayat_pincode).trim();
+    }
+
+    if (vendor_code !== undefined && vendor_code !== null && String(vendor_code).trim() !== "") {
+      payload.vendor_code = String(vendor_code).trim();
     }
 
     const result = await callSP(
