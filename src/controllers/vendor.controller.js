@@ -251,7 +251,124 @@ exports.getAllPanchayatsForAdmin = async (req, res, next) => {
 };
 // For getting all Technicians Data
 
-exports.getMyTechnicians = async (req, res, next) => {
+// exports.getMyTechnicians = async (req, res, next) => {
+//   try {
+//     const {
+//       page,
+//       limit,
+//       all,
+//       year,
+//       month,
+//       technician_name,
+//       technician_latitude,
+//       technician_longitude,
+//       technician_specialization,
+//       technician_status,
+//       technician_code,
+//       technician_phone,
+//     } = req.body || {};
+
+//     const payload = {};
+
+//     if (page !== undefined && page !== null && String(page).trim() !== "") {
+//       payload.page = Number(page);
+//     }
+
+//     if (limit !== undefined && limit !== null && String(limit).trim() !== "") {
+//       payload.limit = Number(limit);
+//     }
+
+//     if (all !== undefined && all !== null && String(all).trim() !== "") {
+//       payload.all = String(all).trim();
+//     }
+
+//     if (year !== undefined && year !== null && String(year).trim() !== "") {
+//       payload.year = Number(year);
+//     }
+
+//     if (month !== undefined && month !== null && String(month).trim() !== "") {
+//       payload.month = Number(month);
+//     }
+
+//     if (technician_name !== undefined && technician_name !== null && String(technician_name).trim() !== "") {
+//       payload.technician_name = String(technician_name).trim();
+//     }
+
+//     if (
+//       technician_latitude !== undefined &&
+//       technician_latitude !== null &&
+//       String(technician_latitude).trim() !== ""
+//     ) {
+//       payload.technician_latitude = String(technician_latitude).trim();
+//     }
+
+//     if (
+//       technician_longitude !== undefined &&
+//       technician_longitude !== null &&
+//       String(technician_longitude).trim() !== ""
+//     ) {
+//       payload.technician_longitude = String(technician_longitude).trim();
+//     }
+
+//     if (
+//       technician_specialization !== undefined &&
+//       technician_specialization !== null &&
+//       String(technician_specialization).trim() !== ""
+//     ) {
+//       payload.technician_specialization = String(technician_specialization).trim();
+//     }
+
+//     if (
+//       technician_status !== undefined &&
+//       technician_status !== null &&
+//       String(technician_status).trim() !== ""
+//     ) {
+//       payload.technician_status = String(technician_status).trim();
+//     }
+
+//     if (
+//       technician_code !== undefined &&
+//       technician_code !== null &&
+//       String(technician_code).trim() !== ""
+//     ) {
+//       payload.technician_code = String(technician_code).trim();
+//     }
+
+//     if (
+//       technician_phone !== undefined &&
+//       technician_phone !== null &&
+//       String(technician_phone).trim() !== ""
+//     ) {
+//       payload.technician_phone = String(technician_phone).trim();
+//     }
+
+//     const result = await callSP(
+//       `
+//       SELECT public.sp_get_technicians_by_vendor(
+//         :vendor_user_id,
+//         :data::jsonb
+//       ) AS response
+//       `,
+//       {
+//         vendor_user_id: req.user.id,
+//         data: JSON.stringify(payload),
+//       }
+//     );
+
+//     const response = result[0].response;
+
+//     if (!response.success) {
+//       return res.status(400).json(response);
+//     }
+
+//     return res.status(200).json(response);
+
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+exports.getTechniciansByVendor = async (req, res, next) => {
   try {
     const {
       page,
@@ -259,13 +376,14 @@ exports.getMyTechnicians = async (req, res, next) => {
       all,
       year,
       month,
-      technician_name,
+      technician_village,
+      technician_district,
+      technician_pincode,
+      technician_specialization,
       technician_latitude,
       technician_longitude,
-      technician_specialization,
       technician_status,
       technician_code,
-      technician_phone,
     } = req.body || {};
 
     const payload = {};
@@ -290,8 +408,36 @@ exports.getMyTechnicians = async (req, res, next) => {
       payload.month = Number(month);
     }
 
-    if (technician_name !== undefined && technician_name !== null && String(technician_name).trim() !== "") {
-      payload.technician_name = String(technician_name).trim();
+    if (
+      technician_village !== undefined &&
+      technician_village !== null &&
+      String(technician_village).trim() !== ""
+    ) {
+      payload.technician_village = String(technician_village).trim();
+    }
+
+    if (
+      technician_district !== undefined &&
+      technician_district !== null &&
+      String(technician_district).trim() !== ""
+    ) {
+      payload.technician_district = String(technician_district).trim();
+    }
+
+    if (
+      technician_pincode !== undefined &&
+      technician_pincode !== null &&
+      String(technician_pincode).trim() !== ""
+    ) {
+      payload.technician_pincode = String(technician_pincode).trim();
+    }
+
+    if (
+      technician_specialization !== undefined &&
+      technician_specialization !== null &&
+      String(technician_specialization).trim() !== ""
+    ) {
+      payload.technician_specialization = String(technician_specialization).trim();
     }
 
     if (
@@ -311,14 +457,6 @@ exports.getMyTechnicians = async (req, res, next) => {
     }
 
     if (
-      technician_specialization !== undefined &&
-      technician_specialization !== null &&
-      String(technician_specialization).trim() !== ""
-    ) {
-      payload.technician_specialization = String(technician_specialization).trim();
-    }
-
-    if (
       technician_status !== undefined &&
       technician_status !== null &&
       String(technician_status).trim() !== ""
@@ -332,14 +470,6 @@ exports.getMyTechnicians = async (req, res, next) => {
       String(technician_code).trim() !== ""
     ) {
       payload.technician_code = String(technician_code).trim();
-    }
-
-    if (
-      technician_phone !== undefined &&
-      technician_phone !== null &&
-      String(technician_phone).trim() !== ""
-    ) {
-      payload.technician_phone = String(technician_phone).trim();
     }
 
     const result = await callSP(
@@ -362,12 +492,10 @@ exports.getMyTechnicians = async (req, res, next) => {
     }
 
     return res.status(200).json(response);
-
   } catch (err) {
     next(err);
   }
 };
-
 // For getting all devices under logged in vendor
 exports.getAllDevicesForVendor = async (req, res, next) => {
   try {
