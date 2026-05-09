@@ -71,6 +71,6 @@ router.get(
   "/getAllPanchayatsForVendor",
   authenticate,
   allowRoles(ROLES.VENDOR),
-  controller.getAllPanchayatsForAdmin
+  controller.getLinkedPanchayatsByVendor
 );
 module.exports = router;

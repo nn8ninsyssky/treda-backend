@@ -41,57 +41,96 @@ exports.updateMyPanchayat = async (req, res, next) => {
       panchayat_latitude,
       panchayat_longitude,
       panchayat_pincode,
-      vendor_code,
     } = req.body || {};
 
     const payload = {};
 
-    if (panchayat_name !== undefined && panchayat_name !== null && String(panchayat_name).trim() !== "") {
+    if (
+      panchayat_name !== undefined &&
+      panchayat_name !== null &&
+      String(panchayat_name).trim() !== ""
+    ) {
       payload.panchayat_name = String(panchayat_name).trim();
     }
 
-    if (panchayat_phone !== undefined && panchayat_phone !== null && String(panchayat_phone).trim() !== "") {
+    if (
+      panchayat_phone !== undefined &&
+      panchayat_phone !== null &&
+      String(panchayat_phone).trim() !== ""
+    ) {
       payload.panchayat_phone = String(panchayat_phone).trim();
     }
 
-    if (panchayat_alt_phone !== undefined && panchayat_alt_phone !== null && String(panchayat_alt_phone).trim() !== "") {
+    if (
+      panchayat_alt_phone !== undefined &&
+      panchayat_alt_phone !== null &&
+      String(panchayat_alt_phone).trim() !== ""
+    ) {
       payload.panchayat_alt_phone = String(panchayat_alt_phone).trim();
     }
 
-    if (panchayat_village !== undefined && panchayat_village !== null && String(panchayat_village).trim() !== "") {
+    if (
+      panchayat_village !== undefined &&
+      panchayat_village !== null &&
+      String(panchayat_village).trim() !== ""
+    ) {
       payload.panchayat_village = String(panchayat_village).trim();
     }
 
-    if (panchayat_block !== undefined && panchayat_block !== null && String(panchayat_block).trim() !== "") {
+    if (
+      panchayat_block !== undefined &&
+      panchayat_block !== null &&
+      String(panchayat_block).trim() !== ""
+    ) {
       payload.panchayat_block = String(panchayat_block).trim();
     }
 
-    if (panchayat_district !== undefined && panchayat_district !== null && String(panchayat_district).trim() !== "") {
+    if (
+      panchayat_district !== undefined &&
+      panchayat_district !== null &&
+      String(panchayat_district).trim() !== ""
+    ) {
       payload.panchayat_district = String(panchayat_district).trim();
     }
 
-    if (panchayat_state !== undefined && panchayat_state !== null && String(panchayat_state).trim() !== "") {
+    if (
+      panchayat_state !== undefined &&
+      panchayat_state !== null &&
+      String(panchayat_state).trim() !== ""
+    ) {
       payload.panchayat_state = String(panchayat_state).trim();
     }
 
-    if (panchayat_country !== undefined && panchayat_country !== null && String(panchayat_country).trim() !== "") {
+    if (
+      panchayat_country !== undefined &&
+      panchayat_country !== null &&
+      String(panchayat_country).trim() !== ""
+    ) {
       payload.panchayat_country = String(panchayat_country).trim();
     }
 
-    if (panchayat_latitude !== undefined && panchayat_latitude !== null && String(panchayat_latitude).trim() !== "") {
+    if (
+      panchayat_latitude !== undefined &&
+      panchayat_latitude !== null &&
+      String(panchayat_latitude).trim() !== ""
+    ) {
       payload.panchayat_latitude = String(panchayat_latitude).trim();
     }
 
-    if (panchayat_longitude !== undefined && panchayat_longitude !== null && String(panchayat_longitude).trim() !== "") {
+    if (
+      panchayat_longitude !== undefined &&
+      panchayat_longitude !== null &&
+      String(panchayat_longitude).trim() !== ""
+    ) {
       payload.panchayat_longitude = String(panchayat_longitude).trim();
     }
 
-    if (panchayat_pincode !== undefined && panchayat_pincode !== null && String(panchayat_pincode).trim() !== "") {
+    if (
+      panchayat_pincode !== undefined &&
+      panchayat_pincode !== null &&
+      String(panchayat_pincode).trim() !== ""
+    ) {
       payload.panchayat_pincode = String(panchayat_pincode).trim();
-    }
-
-    if (vendor_code !== undefined && vendor_code !== null && String(vendor_code).trim() !== "") {
-      payload.vendor_code = String(vendor_code).trim();
     }
 
     const result = await callSP(

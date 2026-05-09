@@ -244,7 +244,6 @@ exports.registerPanchayat = async (req, res, next) => {
       latitude,
       longitude,
       pincode,
-      vendor_code,
     } = req.body || {};
 
     const result = await callSP(
@@ -263,8 +262,7 @@ exports.registerPanchayat = async (req, res, next) => {
         :country,
         :latitude,
         :longitude,
-        :pincode,
-        :vendor_code
+        :pincode
       ) AS response
       `,
       {
@@ -284,23 +282,20 @@ exports.registerPanchayat = async (req, res, next) => {
         country: country ? String(country).trim() : null,
 
         latitude:
-          latitude !== undefined && latitude !== null && String(latitude).trim() !== ""
+          latitude !== undefined &&
+          latitude !== null &&
+          String(latitude).trim() !== ""
             ? Number(latitude)
             : null,
 
         longitude:
-          longitude !== undefined && longitude !== null && String(longitude).trim() !== ""
+          longitude !== undefined &&
+          longitude !== null &&
+          String(longitude).trim() !== ""
             ? Number(longitude)
             : null,
 
         pincode: pincode ? String(pincode).trim() : null,
-
-        vendor_code:
-          vendor_code !== undefined &&
-          vendor_code !== null &&
-          String(vendor_code).trim() !== ""
-            ? String(vendor_code).trim()
-            : null,
       }
     );
 

@@ -86,155 +86,93 @@ exports.updateMyTechnicianByVendor = async (req, res, next) => {
 };
 
 // for getting panchayat by vendor
-exports.getAllPanchayatsForAdmin = async (req, res, next) => {
+exports.getLinkedPanchayatsByVendor = async (req, res, next) => {
   try {
     const {
-      page = 1,
-      limit = 10,
+      page,
+      limit,
+      all,
       year,
       month,
-      district,
-      state,
+      panchayat_name,
+      panchayat_village,
       latitude,
       longitude,
-      radius_km = 10,
-    } = req.query;
+      radius_km,
+    } = req.body || {};
 
-    const parsedPage = Number(page);
-    const parsedLimit = Number(limit);
+    const payload = {};
 
-    const parsedYear =
-      year === undefined || year === '' || year === 'All'
-        ? null
-        : Number(year);
-
-    const parsedMonth =
-      month === undefined || month === '' || month === 'All'
-        ? null
-        : Number(month);
-
-    const parsedLatitude =
-      latitude === undefined || latitude === ''
-        ? null
-        : Number(latitude);
-
-    const parsedLongitude =
-      longitude === undefined || longitude === ''
-        ? null
-        : Number(longitude);
-
-    const parsedRadius =
-      radius_km === undefined || radius_km === ''
-        ? 10
-        : Number(radius_km);
-
-    const parsedDistrict =
-      district === undefined || district === '' || district === 'All'
-        ? null
-        : district;
-
-    const parsedState =
-      state === undefined || state === '' || state === 'All'
-        ? null
-        : state;
-
-    if (Number.isNaN(parsedPage) || parsedPage < 1) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid page value',
-      });
+    if (page !== undefined && page !== null && String(page).trim() !== "") {
+      payload.page = Number(page);
     }
 
-    if (Number.isNaN(parsedLimit) || parsedLimit < 1) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid limit value',
-      });
+    if (limit !== undefined && limit !== null && String(limit).trim() !== "") {
+      payload.limit = Number(limit);
     }
 
-    if (parsedYear !== null && Number.isNaN(parsedYear)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid year value',
-      });
+    if (all !== undefined && all !== null && String(all).trim() !== "") {
+      payload.all = String(all).trim();
     }
 
-    if (parsedMonth !== null && Number.isNaN(parsedMonth)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid month value',
-      });
+    if (year !== undefined && year !== null && String(year).trim() !== "") {
+      payload.year = Number(year);
     }
 
-    if (parsedMonth !== null && (parsedMonth < 1 || parsedMonth > 12)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Month must be between 1 and 12',
-      });
-    }
-
-    if (parsedMonth !== null && parsedYear === null) {
-      return res.status(400).json({
-        success: false,
-        message: 'Year is required when month is provided',
-      });
-    }
-
-    if (parsedLatitude !== null && Number.isNaN(parsedLatitude)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid latitude value',
-      });
-    }
-
-    if (parsedLongitude !== null && Number.isNaN(parsedLongitude)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid longitude value',
-      });
+    if (month !== undefined && month !== null && String(month).trim() !== "") {
+      payload.month = Number(month);
     }
 
     if (
-      (parsedLatitude !== null && parsedLongitude === null) ||
-      (parsedLatitude === null && parsedLongitude !== null)
+      panchayat_name !== undefined &&
+      panchayat_name !== null &&
+      String(panchayat_name).trim() !== ""
     ) {
-      return res.status(400).json({
-        success: false,
-        message: 'Both latitude and longitude are required for location filter',
-      });
+      payload.panchayat_name = String(panchayat_name).trim();
     }
 
-    if (Number.isNaN(parsedRadius) || parsedRadius <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid radius_km value',
-      });
+    if (
+      panchayat_village !== undefined &&
+      panchayat_village !== null &&
+      String(panchayat_village).trim() !== ""
+    ) {
+      payload.panchayat_village = String(panchayat_village).trim();
+    }
+
+    if (
+      latitude !== undefined &&
+      latitude !== null &&
+      String(latitude).trim() !== ""
+    ) {
+      payload.latitude = String(latitude).trim();
+    }
+
+    if (
+      longitude !== undefined &&
+      longitude !== null &&
+      String(longitude).trim() !== ""
+    ) {
+      payload.longitude = String(longitude).trim();
+    }
+
+    if (
+      radius_km !== undefined &&
+      radius_km !== null &&
+      String(radius_km).trim() !== ""
+    ) {
+      payload.radius_km = String(radius_km).trim();
     }
 
     const result = await callSP(
       `
-      SELECT public.sp_get_all_panchayats_for_admin(
-        :page,
-        :limit,
-        :year,
-        :month,
-        :district,
-        :state,
-        :latitude,
-        :longitude,
-        :radius_km
+      SELECT public.sp_get_panchayats_by_vendor(
+        :vendor_user_id,
+        :data::jsonb
       ) AS response
       `,
       {
-        page: parsedPage,
-        limit: parsedLimit,
-        year: parsedYear,
-        month: parsedMonth,
-        district: parsedDistrict,
-        state: parsedState,
-        latitude: parsedLatitude,
-        longitude: parsedLongitude,
-        radius_km: parsedRadius,
+        vendor_user_id: req.user.id,
+        data: JSON.stringify(payload),
       }
     );
 
@@ -245,6 +183,7 @@ exports.getAllPanchayatsForAdmin = async (req, res, next) => {
     }
 
     return res.status(200).json(response);
+
   } catch (err) {
     next(err);
   }
