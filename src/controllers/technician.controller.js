@@ -26,12 +26,23 @@ exports.updateMyTechnician = async (req, res, next) => {
 exports.getMyTechnician = async (req, res, next) => {
   try {
     const result = await callSP(
-      `SELECT sp_get_technician_by_user_id(:user_id)`,
-      { user_id: req.user.id }
+      `
+      SELECT public.sp_get_technician_by_user_id(
+        :user_id::uuid
+      ) AS response
+      `,
+      {
+        user_id: req.user.id,
+      }
     );
 
-    res.json(result[0].sp_get_technician_by_user_id);
+    const response = result[0].response;
 
+    if (!response.success) {
+      return res.status(404).json(response);
+    }
+
+    return res.status(200).json(response);
   } catch (err) {
     next(err);
   }
