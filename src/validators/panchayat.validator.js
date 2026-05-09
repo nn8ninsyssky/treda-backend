@@ -1,16 +1,29 @@
-const Joi = require('joi');
+const Joi = require("joi");
 
 exports.updatePanchayatSchema = Joi.object({
-  customer_name: Joi.string().optional(),
-  customer_phone: Joi.string().optional(),
-  customer_alt_phone: Joi.string().optional(),
-  customer_aadhaar_no: Joi.string().optional(),
-  customer_village: Joi.string().optional(),
-  customer_block: Joi.string().optional(),
-  customer_district: Joi.string().optional(),
-  customer_state: Joi.string().optional(),
-  customer_country: Joi.string().optional(),
-  customer_pincode: Joi.string().optional(), // IMPORTANT
-  customer_latitude: Joi.number().optional(),
-  customer_longitude: Joi.number().optional(),
+  panchayat_name: Joi.string().trim().allow("", null).optional(),
+
+  panchayat_phone: Joi.string().trim().allow("", null).optional(),
+
+  panchayat_alt_phone: Joi.string().trim().allow("", null).optional(),
+
+  panchayat_village: Joi.string().trim().allow("", null).optional(),
+
+  panchayat_block: Joi.string().trim().allow("", null).optional(),
+
+  panchayat_district: Joi.string().trim().allow("", null).optional(),
+
+  panchayat_state: Joi.string().trim().allow("", null).optional(),
+
+  panchayat_country: Joi.string().trim().allow("", null).optional(),
+
+  panchayat_pincode: Joi.string().trim().allow("", null).optional(),
+
+  panchayat_latitude: Joi.alternatives()
+    .try(Joi.number(), Joi.string().trim().allow("", null))
+    .optional(),
+
+  panchayat_longitude: Joi.alternatives()
+    .try(Joi.number(), Joi.string().trim().allow("", null))
+    .optional(),
 });
