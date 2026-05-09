@@ -35,10 +35,10 @@ router.delete(
 
 //Fecth all devices for customer
 router.get(
-  '/devicesforcustomer',
+  '/devicesforpanchayat',
   authenticate,
   allowRoles(ROLES.PANCHAYAT),
-  controller.getMyDevices
+  controller.getDevicesByPanchayat
 );
 
 //Fecth all vendors from which customer had taken devices

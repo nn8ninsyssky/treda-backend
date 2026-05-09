@@ -174,26 +174,112 @@ exports.delete = async (req, res, next) => {
 };
 
 //Fetch all devices for customer
-exports.getMyDevices = async (req, res, next) => {
+exports.getDevicesByPanchayat = async (req, res, next) => {
   try {
+    const {
+      page,
+      limit,
+      all,
+      year,
+      month,
+      latitude,
+      longitude,
+      radius_km,
+      device_category,
+      panchayat_code,
+      device_qr_id,
+    } = req.body || {};
+
+    const payload = {};
+
+    if (page !== undefined && page !== null && String(page).trim() !== "") {
+      payload.page = Number(page);
+    }
+
+    if (limit !== undefined && limit !== null && String(limit).trim() !== "") {
+      payload.limit = Number(limit);
+    }
+
+    if (all !== undefined && all !== null && String(all).trim() !== "") {
+      payload.all = String(all).trim();
+    }
+
+    if (year !== undefined && year !== null && String(year).trim() !== "") {
+      payload.year = Number(year);
+    }
+
+    if (month !== undefined && month !== null && String(month).trim() !== "") {
+      payload.month = Number(month);
+    }
+
+    if (
+      latitude !== undefined &&
+      latitude !== null &&
+      String(latitude).trim() !== ""
+    ) {
+      payload.latitude = String(latitude).trim();
+    }
+
+    if (
+      longitude !== undefined &&
+      longitude !== null &&
+      String(longitude).trim() !== ""
+    ) {
+      payload.longitude = String(longitude).trim();
+    }
+
+    if (
+      radius_km !== undefined &&
+      radius_km !== null &&
+      String(radius_km).trim() !== ""
+    ) {
+      payload.radius_km = String(radius_km).trim();
+    }
+
+    if (
+      device_category !== undefined &&
+      device_category !== null &&
+      String(device_category).trim() !== ""
+    ) {
+      payload.device_category = String(device_category).trim();
+    }
+
+    if (
+      panchayat_code !== undefined &&
+      panchayat_code !== null &&
+      String(panchayat_code).trim() !== ""
+    ) {
+      payload.panchayat_code = String(panchayat_code).trim();
+    }
+
+    if (
+      device_qr_id !== undefined &&
+      device_qr_id !== null &&
+      String(device_qr_id).trim() !== ""
+    ) {
+      payload.device_qr_id = String(device_qr_id).trim();
+    }
+
     const result = await callSP(
-      `SELECT sp_get_devices_by_customer(:user_id)`,
+      `
+      SELECT public.sp_get_devices_by_panchayat(
+        :panchayat_user_id::uuid,
+        :data::jsonb
+      ) AS response
+      `,
       {
-        user_id: req.user.id
+        panchayat_user_id: req.user.id,
+        data: JSON.stringify(payload),
       }
     );
 
-    const response = result?.[0]?.sp_get_devices_by_customer;
+    const response = result[0].response;
 
-    if (!response) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to fetch devices"
-      });
+    if (!response.success) {
+      return res.status(400).json(response);
     }
 
-    res.status(200).json(response);
-
+    return res.status(200).json(response);
   } catch (err) {
     next(err);
   }
