@@ -27,7 +27,13 @@ router.put(
 );
 
 
-// Fetch All Registered Vendors Details 
+
+
+
+
+
+
+// Fetch All Registered Vendors Details for field visitors
 router.get(
   "/getallvendors",
   authenticate,
@@ -36,7 +42,7 @@ router.get(
 );
 
 
-// to check whether a device is registered or not
+// to check whether a device is registered or not for field visitors
 router.post(
   '/check-device',
   authenticate,
