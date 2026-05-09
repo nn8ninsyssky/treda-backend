@@ -16,7 +16,7 @@ router.put(
   controller.updateAiCallLog
 );
 // for getting all ai_call_logs details for admin
-router.get('/getallcalllogs',
+router.post('/getallcalllogs',
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
   controller.getAllAiCallLogsAdmin);
