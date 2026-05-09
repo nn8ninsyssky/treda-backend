@@ -31,25 +31,41 @@ exports.refreshSchema = Joi.object({
 });
 
 exports.registerPanchayatSchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(6).required(),
+  name: Joi.string().trim().required().messages({
+    "string.empty": "Name is required",
+    "any.required": "Name is required",
+  }),
 
-  // Do not allow frontend to decide role.
-  // Backend/SP should set role as panchayat/customer.
-  role: Joi.string().valid('customer', 'panchayat').optional(),
+  email: Joi.string().trim().lowercase().email().required().messages({
+    "string.empty": "Email is required",
+    "string.email": "Valid email is required",
+    "any.required": "Email is required",
+  }),
 
-  phone: Joi.string().optional(),
-  alt_phone: Joi.string().optional(),
-  aadhaar: Joi.string().optional(),
-  village: Joi.string().optional(),
-  block: Joi.string().optional(),
-  district: Joi.string().optional(),
-  state: Joi.string().optional(),
-  country: Joi.string().optional(),
-  latitude: Joi.number().optional(),
-  longitude: Joi.number().optional(),
-  pincode: Joi.string().optional(),
+  password: Joi.string().min(6).required().messages({
+    "string.empty": "Password is required",
+    "string.min": "Password must be at least 6 characters",
+    "any.required": "Password is required",
+  }),
+
+  phone: Joi.string().trim().allow("", null).optional(),
+  alt_phone: Joi.string().trim().allow("", null).optional(),
+
+  village: Joi.string().trim().allow("", null).optional(),
+  block: Joi.string().trim().allow("", null).optional(),
+  district: Joi.string().trim().allow("", null).optional(),
+  state: Joi.string().trim().allow("", null).optional(),
+  country: Joi.string().trim().allow("", null).optional(),
+
+  latitude: Joi.alternatives()
+    .try(Joi.number(), Joi.string().trim().allow("", null))
+    .optional(),
+
+  longitude: Joi.alternatives()
+    .try(Joi.number(), Joi.string().trim().allow("", null))
+    .optional(),
+
+  pincode: Joi.string().trim().allow("", null).optional(),
 });
 
 exports.loginPanchayatSchema = Joi.object({
