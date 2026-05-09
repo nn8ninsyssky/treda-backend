@@ -43,9 +43,9 @@ router.get(
 
 //Fecth all vendors from which customer had taken devices
 router.get(
-  '/getallvendorsforcustomer',
+  '/getallvendorsforpanchayat',
   authenticate,
   allowRoles(ROLES.PANCHAYAT),
-  controller.getMyVendorsForCustomer
+  controller.getLinkedVendorsByPanchayat
 );
 module.exports = router;

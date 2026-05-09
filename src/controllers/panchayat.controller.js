@@ -200,26 +200,93 @@ exports.getMyDevices = async (req, res, next) => {
 };
 
 //Fecth all vendors from which customer had taken devices
-exports.getMyVendorsForCustomer = async (req, res, next) => {
+exports.getLinkedVendorsByPanchayat = async (req, res, next) => {
   try {
+    const {
+      page,
+      limit,
+      all,
+      vendor_code,
+      district,
+      latitude,
+      longitude,
+      radius_km,
+    } = req.body || {};
+
+    const payload = {};
+
+    if (page !== undefined && page !== null && String(page).trim() !== "") {
+      payload.page = Number(page);
+    }
+
+    if (limit !== undefined && limit !== null && String(limit).trim() !== "") {
+      payload.limit = Number(limit);
+    }
+
+    if (all !== undefined && all !== null && String(all).trim() !== "") {
+      payload.all = String(all).trim();
+    }
+
+    if (
+      vendor_code !== undefined &&
+      vendor_code !== null &&
+      String(vendor_code).trim() !== ""
+    ) {
+      payload.vendor_code = String(vendor_code).trim();
+    }
+
+    if (
+      district !== undefined &&
+      district !== null &&
+      String(district).trim() !== ""
+    ) {
+      payload.district = String(district).trim();
+    }
+
+    if (
+      latitude !== undefined &&
+      latitude !== null &&
+      String(latitude).trim() !== ""
+    ) {
+      payload.latitude = String(latitude).trim();
+    }
+
+    if (
+      longitude !== undefined &&
+      longitude !== null &&
+      String(longitude).trim() !== ""
+    ) {
+      payload.longitude = String(longitude).trim();
+    }
+
+    if (
+      radius_km !== undefined &&
+      radius_km !== null &&
+      String(radius_km).trim() !== ""
+    ) {
+      payload.radius_km = String(radius_km).trim();
+    }
+
     const result = await callSP(
-      `SELECT sp_get_vendors_by_customer(:user_id)`,
+      `
+      SELECT public.sp_get_vendors_by_panchayat(
+        :panchayat_user_id::uuid,
+        :data::jsonb
+      ) AS response
+      `,
       {
-        user_id: req.user.id
+        panchayat_user_id: req.user.id,
+        data: JSON.stringify(payload),
       }
     );
 
-    const response = result?.[0]?.sp_get_vendors_by_customer;
+    const response = result[0].response;
 
-    if (!response) {
-      return res.status(500).json({
-        success: false,
-        message: "Failed to fetch vendors"
-      });
+    if (!response.success) {
+      return res.status(400).json(response);
     }
 
-    res.status(200).json(response);
-
+    return res.status(200).json(response);
   } catch (err) {
     next(err);
   }
