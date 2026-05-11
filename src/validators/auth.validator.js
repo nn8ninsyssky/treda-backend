@@ -26,9 +26,7 @@ exports.changePasswordSchema = Joi.object({
   new_password: Joi.string().min(6).required(),
 });
 
-exports.refreshSchema = Joi.object({
-  refreshToken: Joi.string().required(),
-});
+
 
 exports.registerPanchayatSchema = Joi.object({
   name: Joi.string().trim().required().messages({
@@ -142,6 +140,12 @@ exports.loginTredaOfficerSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().required(),
 });
-// module.exports = {
-//   emailOtpSchema,verifyOtpSchema,forgotPasswordSchema,changePasswordSchema,resetPasswordSchema,refreshSchema,registerPanchayatSchema,loginPanchayatSchema,registerVendorSchema,loginVendorSchema,registerTechnicianSchema,loginTechnicianSchema,loginTredaOfficerSchema
-// };
+exports.refreshSchema = Joi.object({
+  refreshToken: Joi.string().required().messages({
+    "string.empty": "Refresh token is required",
+    "any.required": "Refresh token is required",
+  }),
+});
+exports.logoutSchema = Joi.object({});
+
+exports.logoutAllDevicesSchema = Joi.object({});

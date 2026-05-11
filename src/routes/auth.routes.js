@@ -99,6 +99,16 @@ router.post(
 );
 
 // LOGOUT
-router.post('/logout', controller.logout);
+router.post(
+  "/logout",
+  authenticate,
+  controller.logout
+);
+
+router.post(
+  "/logout-all",
+  authenticate,
+  controller.logoutAllDevices
+);
 
 module.exports = router;

@@ -4,8 +4,8 @@ const logger = require('../utils/logger');
 const { callSP } = require('../config/db.postgres');
 const crypto = require('crypto');
 const { sendEmail } = require('../services/email.service');
-const { generateTokens } = require('../utils/token.utils');
-
+const { generateTokens, hashToken  } = require('../utils/token.utils');
+const { createLoginSession } = require("../utils/session.utils");
 /**
  * Generate tokens
  */
@@ -353,12 +353,15 @@ exports.loginPanchayat = async (req, res, next) => {
       return res.status(401).json(response);
     }
 
-    const tokens = generateTokens(response.user);
+    const tokens = await createLoginSession({
+  user: response.user,
+  req,
+});
 
-    res.json({
-      ...response,
-      ...tokens
-    });
+return res.json({
+  ...response,
+  ...tokens,
+});
 
   } catch (err) {
     next(err);
@@ -473,16 +476,22 @@ exports.loginVendor = async (req, res, next) => {
       return res.status(401).json(response);
     }
 
-    const tokens = generateTokens({
-      id: response.user_id,
-      role: response.role,
-      name: response.name
-    });
+    const userForToken = {
+  id: response.user_id,
+  role: response.role,
+  name: response.name,
+  email: response.email || null,
+};
 
-    res.json({
-      ...response,
-      ...tokens
-    });
+const tokens = await createLoginSession({
+  user: userForToken,
+  req,
+});
+
+return res.json({
+  ...response,
+  ...tokens,
+});
 
   } catch (err) {
     next(err);
@@ -563,18 +572,23 @@ exports.loginTechnician = async (req, res, next) => {
     if (!response.success) {
       return res.status(401).json(response);
     }
-console.log("response technician",response);
-logger.push("technician response",response.data)
-    const tokens = generateTokens({
-      id: response.user.id,
-      role: response.user.role,
-      name: response.user.name
-    });
 
-    res.json({
-      ...response,
-      ...tokens
-    });
+    const userForToken = {
+  id: response.user.id,
+  role: response.user.role,
+  name: response.user.name,
+  email: response.user.email || null,
+};
+
+const tokens = await createLoginSession({
+  user: userForToken,
+  req,
+});
+
+return res.json({
+  ...response,
+  ...tokens,
+});
 
   } catch (err) {
     next(err);
@@ -618,16 +632,22 @@ exports.loginTredaAdmin = async (req, res, next) => {
       return res.status(statusCode).json(response);
     }
 
-    const tokens = generateTokens({
-      id: response.user.id,
-      role: response.user.role,
-      name: response.user.name
-    });
+    const userForToken = {
+  id: response.user.id,
+  role: response.user.role,
+  name: response.user.name,
+  email: response.user.email || null,
+};
 
-    return res.status(200).json({
-      ...response,
-      ...tokens
-    });
+const tokens = await createLoginSession({
+  user: userForToken,
+  req,
+});
+
+return res.status(200).json({
+  ...response,
+  ...tokens,
+});
 
   } catch (err) {
     next(err);
@@ -643,60 +663,112 @@ exports.refresh = async (req, res, next) => {
     if (!refreshToken) {
       return res.status(401).json({
         success: false,
-        code: 'NO_REFRESH_TOKEN',
-        message: 'Refresh token missing.',
+        code: "NO_REFRESH_TOKEN",
+        message: "Refresh token missing.",
       });
     }
 
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    if (decoded.tokenType !== 'refresh') {
+    if (decoded.tokenType !== "refresh") {
       return res.status(403).json({
         success: false,
-        code: 'INVALID_TOKEN_TYPE',
-        message: 'Invalid token type.',
+        code: "INVALID_TOKEN_TYPE",
+        message: "Invalid token type.",
       });
     }
 
-    const result = await callSP(
-      `SELECT sp_get_user_for_refresh(:user_id)`,
+    if (!decoded.session_id || !decoded.jti) {
+      return res.status(403).json({
+        success: false,
+        code: "INVALID_REFRESH_TOKEN",
+        message: "Invalid refresh token.",
+      });
+    }
+
+    const validateResult = await callSP(
+      `
+      SELECT public.sp_validate_refresh_session(
+        :user_id::uuid,
+        :session_id::uuid,
+        :refresh_jti,
+        :refresh_token_hash
+      ) AS response
+      `,
       {
         user_id: decoded.id,
+        session_id: decoded.session_id,
+        refresh_jti: decoded.jti,
+        refresh_token_hash: hashToken(refreshToken),
       }
     );
 
-    const response = result?.[0]?.sp_get_user_for_refresh;
+    const validateResponse = validateResult?.[0]?.response;
 
-    if (!response || !response.success) {
+    if (!validateResponse || !validateResponse.success) {
       return res.status(401).json({
         success: false,
-        code: 'INVALID_REFRESH_TOKEN',
-        message: 'Invalid refresh token.',
+        code: "INVALID_REFRESH_SESSION",
+        message: validateResponse?.message || "Invalid refresh session.",
       });
     }
 
-    const tokens = generateTokens(response.user);
+    const tokens = generateTokens(validateResponse.user, decoded.session_id);
+
+    const rotateResult = await callSP(
+      `
+      SELECT public.sp_rotate_user_session_tokens(
+        :user_id::uuid,
+        :session_id::uuid,
+        :new_access_jti,
+        :new_refresh_jti,
+        :new_refresh_token_hash,
+        :new_access_expires_at,
+        :new_refresh_expires_at
+      ) AS response
+      `,
+      {
+        user_id: validateResponse.user.id,
+        session_id: decoded.session_id,
+        new_access_jti: tokens.accessJti,
+        new_refresh_jti: tokens.refreshJti,
+        new_refresh_token_hash: tokens.refreshTokenHash,
+        new_access_expires_at: tokens.accessExpiresAt,
+        new_refresh_expires_at: tokens.refreshExpiresAt,
+      }
+    );
+
+    const rotateResponse = rotateResult?.[0]?.response;
+
+    if (!rotateResponse || !rotateResponse.success) {
+      return res.status(401).json({
+        success: false,
+        code: "SESSION_ROTATE_FAILED",
+        message: rotateResponse?.message || "Failed to rotate session.",
+      });
+    }
 
     return res.status(200).json({
       success: true,
-      message: 'Token refreshed successfully.',
-      ...tokens,
+      message: "Token refreshed successfully.",
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
     });
 
   } catch (err) {
-    if (err.name === 'TokenExpiredError') {
+    if (err.name === "TokenExpiredError") {
       return res.status(403).json({
         success: false,
-        code: 'REFRESH_TOKEN_EXPIRED',
-        message: 'Refresh token expired. Please login again.',
+        code: "REFRESH_TOKEN_EXPIRED",
+        message: "Refresh token expired. Please login again.",
       });
     }
 
-    if (err.name === 'JsonWebTokenError') {
+    if (err.name === "JsonWebTokenError") {
       return res.status(403).json({
         success: false,
-        code: 'INVALID_REFRESH_TOKEN',
-        message: 'Invalid refresh token.',
+        code: "INVALID_REFRESH_TOKEN",
+        message: "Invalid refresh token.",
       });
     }
 
@@ -707,9 +779,61 @@ exports.refresh = async (req, res, next) => {
 /**
  * LOGOUT
  */
-exports.logout = async (req, res) => {
-  res.json({
-    success: true,
-    message: 'Logged out successfully',
-  });
+exports.logout = async (req, res, next) => {
+  try {
+    const result = await callSP(
+      `
+      SELECT public.sp_logout_current_session(
+        :user_id::uuid,
+        :session_id::uuid
+      ) AS response
+      `,
+      {
+        user_id: req.user.id,
+        session_id: req.user.session_id,
+      }
+    );
+
+    const response = result?.[0]?.response;
+
+    if (!response || !response.success) {
+      return res.status(400).json(response || {
+        success: false,
+        message: "Logout failed",
+      });
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
+};
+exports.logoutAllDevices = async (req, res, next) => {
+  try {
+    const result = await callSP(
+      `
+      SELECT public.sp_logout_all_sessions(
+        :user_id::uuid
+      ) AS response
+      `,
+      {
+        user_id: req.user.id,
+      }
+    );
+
+    const response = result?.[0]?.response;
+
+    if (!response || !response.success) {
+      return res.status(400).json(response || {
+        success: false,
+        message: "Logout from all devices failed",
+      });
+    }
+
+    return res.status(200).json(response);
+
+  } catch (err) {
+    next(err);
+  }
 };
