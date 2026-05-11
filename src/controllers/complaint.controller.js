@@ -16,7 +16,7 @@ exports.registerComplaint = async (req, res, next) => {
       assigned_vendor_code = null,
       complaint_type = null,
       complaint_priority = null,
-      complaint_status = "open",
+      complaint_status = "pending",
     } = req.body;
 
     // 1. PostgreSQL insert
