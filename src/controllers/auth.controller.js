@@ -4,26 +4,9 @@ const logger = require('../utils/logger');
 const { callSP } = require('../config/db.postgres');
 const crypto = require('crypto');
 const { sendEmail } = require('../services/email.service');
-const { generateTokens, hashToken  } = require('../utils/token.utils');
+const { generateTokens, hashToken } = require('../utils/token.utils');
 const { createLoginSession } = require("../utils/session.utils");
-/**
- * Generate tokens
- */
-// const generateTokens = (user) => {
-//   const accessToken = jwt.sign(
-//     { id: user.id, role: user.role, name: user.name },
-//     process.env.JWT_SECRET,
-//     { expiresIn: process.env.JWT_EXPIRES_IN }
-//   );
 
-//   const refreshToken = jwt.sign(
-//     { id: user.id },
-//     process.env.JWT_REFRESH_SECRET,
-//     { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
-//   );
-
-//   return { accessToken, refreshToken };
-// };
 
 //Email verification For all registration
 exports.sendVendorEmailOtp = async (req, res, next) => {
@@ -99,7 +82,7 @@ exports.verifyVendorEmailOtp = async (req, res, next) => {
 //forgot password controller function for all roles...
 exports.forgotPassword = async (req, res, next) => {
   try {
-    const { email,page } = req.body;
+    const { email, page } = req.body;
 
     if (!email) {
       return res.status(400).json({
@@ -283,15 +266,15 @@ exports.registerPanchayat = async (req, res, next) => {
 
         latitude:
           latitude !== undefined &&
-          latitude !== null &&
-          String(latitude).trim() !== ""
+            latitude !== null &&
+            String(latitude).trim() !== ""
             ? Number(latitude)
             : null,
 
         longitude:
           longitude !== undefined &&
-          longitude !== null &&
-          String(longitude).trim() !== ""
+            longitude !== null &&
+            String(longitude).trim() !== ""
             ? Number(longitude)
             : null,
 
@@ -354,14 +337,14 @@ exports.loginPanchayat = async (req, res, next) => {
     }
 
     const tokens = await createLoginSession({
-  user: response.user,
-  req,
-});
+      user: response.user,
+      req,
+    });
 
-return res.json({
-  ...response,
-  ...tokens,
-});
+    return res.json({
+      ...response,
+      ...tokens,
+    });
 
   } catch (err) {
     next(err);
@@ -477,21 +460,21 @@ exports.loginVendor = async (req, res, next) => {
     }
 
     const userForToken = {
-  id: response.user_id,
-  role: response.role,
-  name: response.name,
-  email: response.email || null,
-};
+      id: response.user_id,
+      role: response.role,
+      name: response.name,
+      email: response.email || null,
+    };
 
-const tokens = await createLoginSession({
-  user: userForToken,
-  req,
-});
+    const tokens = await createLoginSession({
+      user: userForToken,
+      req,
+    });
 
-return res.json({
-  ...response,
-  ...tokens,
-});
+    return res.json({
+      ...response,
+      ...tokens,
+    });
 
   } catch (err) {
     next(err);
@@ -574,21 +557,21 @@ exports.loginTechnician = async (req, res, next) => {
     }
 
     const userForToken = {
-  id: response.user.id,
-  role: response.user.role,
-  name: response.user.name,
-  email: response.user.email || null,
-};
+      id: response.user.id,
+      role: response.user.role,
+      name: response.user.name,
+      email: response.user.email || null,
+    };
 
-const tokens = await createLoginSession({
-  user: userForToken,
-  req,
-});
+    const tokens = await createLoginSession({
+      user: userForToken,
+      req,
+    });
 
-return res.json({
-  ...response,
-  ...tokens,
-});
+    return res.json({
+      ...response,
+      ...tokens,
+    });
 
   } catch (err) {
     next(err);
@@ -633,21 +616,21 @@ exports.loginTredaAdmin = async (req, res, next) => {
     }
 
     const userForToken = {
-  id: response.user.id,
-  role: response.user.role,
-  name: response.user.name,
-  email: response.user.email || null,
-};
+      id: response.user.id,
+      role: response.user.role,
+      name: response.user.name,
+      email: response.user.email || null,
+    };
 
-const tokens = await createLoginSession({
-  user: userForToken,
-  req,
-});
+    const tokens = await createLoginSession({
+      user: userForToken,
+      req,
+    });
 
-return res.status(200).json({
-  ...response,
-  ...tokens,
-});
+    return res.status(200).json({
+      ...response,
+      ...tokens,
+    });
 
   } catch (err) {
     next(err);
