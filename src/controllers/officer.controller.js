@@ -5,21 +5,32 @@ const { callSP } = require('../config/db.postgres');
 exports.updateMyAdmin = async (req, res, next) => {
   try {
     const result = await callSP(
-      `SELECT sp_update_admin(:user_id, :data)`,
+      `
+      SELECT public.sp_update_admin(
+        :user_id::uuid,
+        :data::json
+      ) AS response
+      `,
       {
         user_id: req.user.id,
-        data: JSON.stringify(req.body)
+        data: JSON.stringify(req.body || {}),
       }
     );
 
-    const response = result[0].sp_update_admin;
+    const response = result?.[0]?.response;
+
+    if (!response) {
+      return res.status(500).json({
+        success: false,
+        message: "No response from database",
+      });
+    }
 
     if (!response.success) {
       return res.status(400).json(response);
     }
 
-    res.json(response);
-
+    return res.status(200).json(response);
   } catch (err) {
     next(err);
   }

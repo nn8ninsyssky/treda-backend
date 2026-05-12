@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const validate = require('../middlewares/validate');
-const { updateOfficerSchema } = require('../validators/officer.validator');
+const { updateAdminSchema } = require('../validators/officer.validator');
 
 
 const authenticate = require('../middlewares/auth');
@@ -23,7 +23,7 @@ router.put(
   '/me',
   authenticate,
   allowRoles(ROLES.ADMIN,ROLES.TREDA_OFFICER),
-  validate(updateOfficerSchema),
+  validate(updateAdminSchema),
   controller.updateMyAdmin
 );
 
