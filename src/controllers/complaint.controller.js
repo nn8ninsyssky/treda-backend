@@ -9,7 +9,13 @@ const { sendEmail } = require('../services/email.service');
 
 exports.registerComplaint = async (req, res, next) => {
   try {
-        const user_id = req.user?.id || null;
+    console.log("🔥 registerComplaint API HIT");
+    console.log("REQ USER:", req.user || null);
+    console.log("REQ BODY:", req.body);
+
+    const user_id = req.user?.id || null;
+
+    console.log("Resolved user_id:", user_id);
 
     const {
       device_qr_id,
@@ -17,9 +23,27 @@ exports.registerComplaint = async (req, res, next) => {
       complaint_type = null,
       complaint_priority = null,
       complaint_status = "pending",
+
+      complaint_description = "",
+      complaint_resolution_notes = "",
+      complaint_visit_notes = "",
     } = req.body;
 
+    console.log("Parsed complaint payload:", {
+      user_id,
+      device_qr_id,
+      assigned_vendor_code,
+      complaint_type,
+      complaint_priority,
+      complaint_status,
+      complaint_description,
+      complaint_resolution_notes,
+      complaint_visit_notes,
+    });
+
     // 1. PostgreSQL insert
+    console.log("Calling SP: public.sp_register_complaint");
+
     const result = await callSP(
       `
       SELECT public.sp_register_complaint(
@@ -41,41 +65,86 @@ exports.registerComplaint = async (req, res, next) => {
       }
     );
 
+    console.log("Raw SP result:", JSON.stringify(result, null, 2));
+
     const response = result?.[0]?.sp_register_complaint;
 
+    console.log("Parsed SP response:", JSON.stringify(response, null, 2));
+
     if (!response.success) {
+      console.warn("SP returned success false:", JSON.stringify(response, null, 2));
       return res.status(400).json(response);
     }
 
+    if (!response) {
+      console.error("No response from database SP");
+      return res.status(500).json({
+        success: false,
+        message: "No response from database",
+      });
+    }
+
+    console.log("PostgreSQL complaint inserted successfully:", {
+      complaint_no: response.complaint_no,
+      assigned_vendor_code: response.assigned_vendor_code,
+      assigned_technician_code: response.assigned_technician_code,
+      vendor_assignment_status: response.vendor_assignment_status,
+      technician_assignment_status: response.technician_assignment_status,
+    });
+
     // 2. Mongo insert
     try {
+      console.log("Preparing MongoDB insert...");
+
       const db = getDb();
 
+      console.log("MongoDB instance received:", !!db);
+      console.log("MongoDB target collection: complaint");
+
+      const mongoPayload = {
+        complaint_no: response.complaint_no,
+        complaint_description: complaint_description || "",
+        complaint_resolution_notes: complaint_resolution_notes || "",
+        complaint_visit_notes: complaint_visit_notes || "",
+        created_at: new Date()
+      };
+
+      console.log("MongoDB insert payload:", JSON.stringify(mongoPayload, null, 2));
+
       await retryMongoInsert(async () => {
-        return db.collection('complaint').insertOne({
-          complaint_no: response.complaint_no,
-          complaint_description: complaint_description || "",
-          complaint_resolution_notes: complaint_resolution_notes || "",
-          complaint_visit_notes: complaint_visit_notes || "",
-          created_at: new Date()
-        });
+        const mongoInsertResult = await db.collection('complaint').insertOne(mongoPayload);
+
+        console.log("MongoDB insert result:", JSON.stringify({
+          acknowledged: mongoInsertResult.acknowledged,
+          insertedId: mongoInsertResult.insertedId,
+        }, null, 2));
+
+        return mongoInsertResult;
       });
+
+      console.log("MongoDB complaint insert completed successfully");
 
     } catch (mongoErr) {
       console.error("Mongo insert failed:", mongoErr.message);
+      console.error("Mongo insert full error:", mongoErr);
     }
 
     //  3. EMAIL NOTIFICATION
-    
+
+    console.log("Fetching complaint full details using device_qr_id:", device_qr_id);
+
     const detailsResult = await callSP(
-  `SELECT sp_get_complaint_by_device_qr(:device_qr_id)`,
-  { device_qr_id }
-);
+      `SELECT sp_get_complaint_by_device_qr(:device_qr_id)`,
+      { device_qr_id }
+    );
 
-const details = detailsResult?.[0]?.sp_get_complaint_by_device_qr.data;
+    console.log("Raw complaint details SP result:", JSON.stringify(detailsResult, null, 2));
 
-console.log("Full complaint details:", details);
-const emailText = `
+    const details = detailsResult?.[0]?.sp_get_complaint_by_device_qr.data;
+
+    console.log("Full complaint details:", JSON.stringify(details, null, 2));
+
+    const emailText = `
 Complaint Details:
 
 Complaint NO: ${details?.complaint_no}
@@ -98,63 +167,97 @@ Specialization:${details.technician?.specialization}
 Status:${details.technician?.status}
 `;
 
-try {
+    console.log("Prepared email text:", emailText);
 
-  // ===== VENDOR EMAIL =====
-  if (response.vendor_assignment_status === 'accepted') {
-    const vendorEmailResult = await callSP(
-      `SELECT sp_get_user_email_by_vendor(:vendor_id)`,
-      { vendor_id: response.assigned_vendor_id }
-    );
+    try {
+      console.log("Starting email notification flow...");
 
-    const vendorEmail =
-      vendorEmailResult?.[0]?.sp_get_user_email_by_vendor;
+      // ===== VENDOR EMAIL =====
+      console.log("Vendor assignment status:", response.vendor_assignment_status);
 
-    if (!vendorEmail) {
-      console.warn("Vendor email not found");
-    } else {
-      console.log("Sending email to vendor:", vendorEmail);
+      if (response.vendor_assignment_status === 'accepted') {
+        console.log("Vendor assignment accepted. Fetching vendor email...");
+        console.log("Vendor code being passed:", response.assigned_vendor_code);
 
-      // DON'T BLOCK RESPONSE
-      sendEmail({
-        to: vendorEmail,
-        subject: "New Complaint Assigned",
-        text: emailText,
-      });
+        const vendorEmailResult = await callSP(
+          `SELECT sp_get_user_email_by_vendor(:vendor_code)`,
+          { vendor_code: response.assigned_vendor_code }
+        );
+
+        console.log("Raw vendor email SP result:", JSON.stringify(vendorEmailResult, null, 2));
+
+        const vendorEmail =
+          vendorEmailResult?.[0]?.sp_get_user_email_by_vendor;
+
+        console.log("Parsed vendor email:", vendorEmail);
+
+        if (!vendorEmail) {
+          console.warn("Vendor email not found");
+        } else {
+          console.log("Sending email to vendor:", vendorEmail);
+
+          // DON'T BLOCK RESPONSE
+          sendEmail({
+            to: vendorEmail,
+            subject: "New Complaint Assigned",
+            text: emailText,
+          });
+
+          console.log("Vendor email sendEmail() called successfully");
+        }
+      } else {
+        console.log("Vendor email skipped because vendor_assignment_status is not accepted");
+      }
+
+      // ===== TECHNICIAN EMAIL =====
+      console.log("Technician assignment status:", response.technician_assignment_status);
+
+      if (response.technician_assignment_status === 'accepted') {
+        console.log("Technician assignment accepted. Fetching technician email...");
+        console.log("Technician code being passed:", response.assigned_technician_code);
+
+        const techEmailResult = await callSP(
+          `SELECT sp_get_user_email_by_technician(:technician_code)`,
+          { technician_code: response.assigned_technician_code }
+        );
+
+        console.log("Raw technician email SP result:", JSON.stringify(techEmailResult, null, 2));
+
+        const techEmail =
+          techEmailResult?.[0]?.sp_get_user_email_by_technician;
+
+        console.log("Parsed technician email:", techEmail);
+
+        if (!techEmail) {
+          console.warn("Technician email not found");
+        } else {
+          console.log("Sending email to technician:", techEmail);
+
+          // fire-and-forget
+          sendEmail({
+            to: techEmail,
+            subject: "New Task Assigned",
+            text: emailText,
+          });
+
+          console.log("Technician email sendEmail() called successfully");
+        }
+      } else {
+        console.log("Technician email skipped because technician_assignment_status is not accepted");
+      }
+
+    } catch (emailErr) {
+      console.error("Email error:", emailErr);
+      console.error("Email error message:", emailErr.message);
     }
-  }
 
-  // ===== TECHNICIAN EMAIL =====
-  if (response.technician_assignment_status === 'accepted') {
-    const techEmailResult = await callSP(
-      `SELECT sp_get_user_email_by_technician(:technician_id)`,
-      { technician_id: response.assigned_technician_id }
-    );
-
-    const techEmail =
-      techEmailResult?.[0]?.sp_get_user_email_by_technician;
-
-    if (!techEmail) {
-      console.warn(" Technician email not found");
-    } else {
-      console.log("Sending email to technician:", techEmail);
-
-      // fire-and-forget
-      sendEmail({
-        to: techEmail,
-        subject: "New Task Assigned",
-        text: emailText,
-      });
-    }
-  }
-
-} catch (emailErr) {
-  console.error("Email error:", emailErr);
-}
+    console.log("Final API response being sent:", JSON.stringify(response, null, 2));
 
     res.status(201).json(response);
 
   } catch (err) {
+    console.error("registerComplaint controller error:", err);
+    console.error("registerComplaint error message:", err.message);
     next(err);
   }
 };
