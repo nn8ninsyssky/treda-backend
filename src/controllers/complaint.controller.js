@@ -400,6 +400,65 @@ exports.updateComplaintStatus = async (req, res, next) => {
 };
 // get all complaint by admin vendor and technician
 
+// exports.getAllComplaintsRolewise = async (req, res, next) => {
+//   try {
+//     const user_id = req.user.id;
+
+//     const {
+//       page = 1,
+//       limit = 10,
+//       search = null,
+//       year = null,
+//       month = null,
+//       device_qr_id = null,
+//       complaint_priority = null,
+//     } = req.query;
+
+//     const result = await callSP(
+//       `
+//       SELECT public.sp_get_all_complaints_rolewise(
+//         :user_id,
+//         :page,
+//         :limit,
+//         :search,
+//         :year,
+//         :month,
+//         :device_qr_id,
+//         :complaint_priority
+//       )
+//       `,
+//       {
+//         user_id,
+//         page: Number(page),
+//         limit: Number(limit),
+//         search: search || null,
+//         year: year ? Number(year) : null,
+//         month: month ? Number(month) : null,
+//         device_qr_id: device_qr_id || null,
+//         complaint_priority: complaint_priority || null,
+//       }
+//     );
+
+//     const response = result?.[0]?.sp_get_all_complaints_rolewise;
+
+//     if (!response) {
+//       return res.status(500).json({
+//         success: false,
+//         message: "Failed to fetch complaints",
+//       });
+//     }
+
+//     if (!response.success) {
+//       return res.status(400).json(response);
+//     }
+
+//     return res.status(200).json(response);
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+
+
 exports.getAllComplaintsRolewise = async (req, res, next) => {
   try {
     const user_id = req.user.id;
@@ -452,7 +511,72 @@ exports.getAllComplaintsRolewise = async (req, res, next) => {
       return res.status(400).json(response);
     }
 
-    return res.status(200).json(response);
+    /*
+      PostgreSQL response.data is expected to be an array of complaints.
+      Now we fetch MongoDB complaint notes using complaint_no.
+    */
+    const postgresComplaints = Array.isArray(response.data)
+      ? response.data
+      : [];
+
+    let finalComplaints = postgresComplaints;
+
+    try {
+      const complaintNos = postgresComplaints
+        .map((complaint) => complaint.complaint_no)
+        .filter(Boolean);
+
+      if (complaintNos.length > 0) {
+        const db = getDb();
+
+        const mongoComplaints = await db
+          .collection("complaint")
+          .find({
+            complaint_no: { $in: complaintNos },
+          })
+          .toArray();
+
+        const mongoComplaintMap = {};
+
+        mongoComplaints.forEach((doc) => {
+          mongoComplaintMap[doc.complaint_no] = {
+            id: doc._id,
+            complaint_no: doc.complaint_no,
+            complaint_description: doc.complaint_description || "",
+            complaint_resolution_notes: doc.complaint_resolution_notes || "",
+            complaint_visit_notes: doc.complaint_visit_notes || "",
+            created_at: doc.created_at || null,
+            updated_at: doc.updated_at || null,
+          };
+        });
+
+        finalComplaints = postgresComplaints.map((complaint) => ({
+          ...complaint,
+          mongo_details: mongoComplaintMap[complaint.complaint_no] || null,
+        }));
+      } else {
+        finalComplaints = postgresComplaints.map((complaint) => ({
+          ...complaint,
+          mongo_details: null,
+        }));
+      }
+    } catch (mongoErr) {
+      console.error("Mongo complaint fetch failed:", mongoErr.message);
+
+      /*
+        Do not fail the API if MongoDB fails.
+        PostgreSQL is the main source of truth.
+      */
+      finalComplaints = postgresComplaints.map((complaint) => ({
+        ...complaint,
+        mongo_details: null,
+      }));
+    }
+
+    return res.status(200).json({
+      ...response,
+      data: finalComplaints,
+    });
   } catch (err) {
     next(err);
   }
