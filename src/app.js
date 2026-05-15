@@ -35,18 +35,18 @@ app.use(
   })
 );
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://tredacms.dpdns.org"
-];
+// const allowedOrigins = [
+//   "http://localhost:3000",
+//   "https://tredacms.dpdns.org"
+// ];
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+// app.use(cors({
+//   origin: allowedOrigins,
+//   credentials: true
+// }));
 
 // Body parsers
-//app.use(cors());
+app.use(cors());
 
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: false, limit: '10kb' }));
